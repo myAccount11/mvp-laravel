@@ -23,30 +23,53 @@ use Carbon\Carbon;
 
 class CalendarService
 {
-    protected CourtService $courtService;
-    protected GameService $gameService;
-    protected TimeSlotService $timeSlotService;
-    protected ReservationService $reservationService;
-    protected SuggestionService $suggestionService;
-    protected TeamService $teamService;
-    protected UserService $userService;
+    protected ?CourtService $courtService = null;
+    protected ?GameService $gameService = null;
+    protected ?TimeSlotService $timeSlotService = null;
+    protected ?ReservationService $reservationService = null;
+    protected ?SuggestionService $suggestionService = null;
+    protected ?TeamService $teamService = null;
+    protected ?UserService $userService = null;
 
-    public function __construct(
-        CourtService $courtService,
-        GameService $gameService,
-        TimeSlotService $timeSlotService,
-        ReservationService $reservationService,
-        SuggestionService $suggestionService,
-        TeamService $teamService,
-        UserService $userService
-    ) {
-        $this->courtService = $courtService;
-        $this->gameService = $gameService;
-        $this->timeSlotService = $timeSlotService;
-        $this->reservationService = $reservationService;
-        $this->suggestionService = $suggestionService;
-        $this->teamService = $teamService;
-        $this->userService = $userService;
+    public function __construct()
+    {
+        // No dependencies - use lazy loading
+    }
+
+    // Lazy loading methods for services
+    protected function getCourtService(): CourtService
+    {
+        return $this->courtService ??= app(CourtService::class);
+    }
+
+    protected function getGameService(): GameService
+    {
+        return $this->gameService ??= app(GameService::class);
+    }
+
+    protected function getTimeSlotService(): TimeSlotService
+    {
+        return $this->timeSlotService ??= app(TimeSlotService::class);
+    }
+
+    protected function getReservationService(): ReservationService
+    {
+        return $this->reservationService ??= app(ReservationService::class);
+    }
+
+    protected function getSuggestionService(): SuggestionService
+    {
+        return $this->suggestionService ??= app(SuggestionService::class);
+    }
+
+    protected function getTeamService(): TeamService
+    {
+        return $this->teamService ??= app(TeamService::class);
+    }
+
+    protected function getUserService(): UserService
+    {
+        return $this->userService ??= app(UserService::class);
     }
 
     public function getData(array $query, $user): array
@@ -64,7 +87,7 @@ class CalendarService
             $teams = [];
 
             if ($type === 'coach' && $coachId) {
-                $user = $this->userService->findOne(['where' => ['id' => $coachId]]);
+                $user = $this->getUserService()->findOne(['where' => ['id' => $coachId]]);
             }
 
             $userTeams = $user->userRoles()
@@ -78,7 +101,7 @@ class CalendarService
             $userTeamIds = [];
 
             if (!empty($userTeams)) {
-                $teams = $this->teamService->findAll(['where' => ['id' => ['in' => $userTeams]]]);
+                $teams = $this->getTeamService()->findAll(['where' => ['id' => ['in' => $userTeams]]]);
                 $userTeamIds = $teams->pluck('id')->toArray();
             }
 
@@ -92,7 +115,7 @@ class CalendarService
                     ->toArray();
 
                 if (!empty($clubIds)) {
-                    $teams = $this->teamService->findAll(['where' => ['club_id' => ['in' => $clubIds]]]);
+                    $teams = $this->getTeamService()->findAll(['where' => ['club_id' => ['in' => $clubIds]]]);
                     $userTeamIds = $teams->pluck('id')->toArray();
                 }
             }
@@ -106,12 +129,10 @@ class CalendarService
         }
 
         if ($type === 'court' && $courtId) {
-            $courts = $this->courtService->findAll([
-                'where' => [
-                    ['id', '=', $courtId],
-                    ['parent_id', '=', $courtId],
-                ],
-            ]);
+            // Find courts where id = courtId OR parent_id = courtId
+            $courts = \App\Models\V5\Court::where('id', $courtId)
+                ->orWhere('parent_id', $courtId)
+                ->get();
 
             $courtIds = $courts->pluck('id')->toArray();
 
@@ -177,7 +198,7 @@ class CalendarService
                 ];
             }
 
-            $reservations = $this->reservationService->findAll([
+            $reservations = $this->getReservationService()->findAll([
                 'where' => [
                     'is_deleted' => false,
                     ['game_id', 'is', null],

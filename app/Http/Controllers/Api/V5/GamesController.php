@@ -32,8 +32,20 @@ class GamesController extends Controller
 
     public function getGamesCount(Request $request): JsonResponse
     {
-        $count = $this->gameService->getGamesCount($request->all());
-        return response()->json($count);
+        try {
+            $count = $this->gameService->getGamesCount($request->all());
+            return response()->json($count);
+        } catch (\Exception $e) {
+            \Log::error('Error in GamesController::getGamesCount', [
+                'message' => $e->getMessage(),
+                'trace' => $e->getTraceAsString(),
+                'request' => $request->all()
+            ]);
+            return response()->json([
+                'error' => 'Failed to get games count',
+                'message' => $e->getMessage()
+            ], 500);
+        }
     }
 
     public function getGamesWithRefs(Request $request): JsonResponse

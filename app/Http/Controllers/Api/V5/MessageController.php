@@ -53,16 +53,38 @@ class MessageController extends Controller
 
     public function getMessagesCount(): JsonResponse
     {
-        $seasonSportId = request('seasonSportId');
-        $userIds = UserSeasonSport::where('season_sport_id', $seasonSportId)
-            ->pluck('user_id')
-            ->toArray();
-        
-        $count = Message::whereIn('type_id', [2, 5])
-            ->whereIn('user_id', $userIds)
-            ->count();
-        
-        return response()->json($count);
+        try {
+            $seasonSportId = request('seasonSportId');
+            
+            // If seasonSportId is 0 or empty, return 0 or handle differently
+            if (!$seasonSportId || $seasonSportId == '0' || $seasonSportId == 0) {
+                return response()->json(0);
+            }
+            
+            $userIds = UserSeasonSport::where('season_sport_id', $seasonSportId)
+                ->pluck('user_id')
+                ->toArray();
+            
+            if (empty($userIds)) {
+                return response()->json(0);
+            }
+            
+            $count = Message::whereIn('type_id', [2, 5])
+                ->whereIn('user_id', $userIds)
+                ->count();
+            
+            return response()->json($count);
+        } catch (\Exception $e) {
+            \Log::error('Error in MessageController::getMessagesCount', [
+                'message' => $e->getMessage(),
+                'trace' => $e->getTraceAsString(),
+                'seasonSportId' => request('seasonSportId')
+            ]);
+            return response()->json([
+                'error' => 'Failed to get messages count',
+                'message' => $e->getMessage()
+            ], 500);
+        }
     }
 
     public function getById(int $id): JsonResponse

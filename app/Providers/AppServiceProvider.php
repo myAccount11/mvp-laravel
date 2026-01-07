@@ -99,173 +99,173 @@ class AppServiceProvider extends ServiceProvider
      */
     public function register(): void
     {
-        // Register Repositories
-        $this->app->singleton(OrganizerRepository::class, function ($app) {
-            return new OrganizerRepository($app->make(Organizer::class));
+        // Register Repositories (using direct instantiation to avoid circular dependencies)
+        $this->app->bind(OrganizerRepository::class, function () {
+            return new OrganizerRepository(new Organizer());
         });
 
-        $this->app->singleton(SportRepository::class, function ($app) {
-            return new SportRepository($app->make(Sport::class));
+        $this->app->bind(SportRepository::class, function () {
+            return new SportRepository(new Sport());
         });
 
-        $this->app->singleton(SeasonRepository::class, function ($app) {
-            return new SeasonRepository($app->make(Season::class));
+        $this->app->bind(SeasonRepository::class, function () {
+            return new SeasonRepository(new Season());
         });
 
-        $this->app->singleton(CourtRepository::class, function ($app) {
-            return new CourtRepository($app->make(Court::class));
+        $this->app->bind(CourtRepository::class, function () {
+            return new CourtRepository(new Court());
         });
 
-        $this->app->singleton(CourtUsageRepository::class, function ($app) {
-            return new CourtUsageRepository($app->make(CourtUsage::class));
+        $this->app->bind(CourtUsageRepository::class, function () {
+            return new CourtUsageRepository(new CourtUsage());
         });
 
-        $this->app->singleton(VenueRepository::class, function ($app) {
-            return new VenueRepository($app->make(Venue::class));
+        $this->app->bind(VenueRepository::class, function () {
+            return new VenueRepository(new Venue());
         });
 
-        $this->app->singleton(PersonRepository::class, function ($app) {
-            return new PersonRepository($app->make(Person::class));
+        $this->app->bind(PersonRepository::class, function () {
+            return new PersonRepository(new Person());
         });
 
-        $this->app->singleton(CoachRepository::class, function ($app) {
-            return new CoachRepository($app->make(Coach::class));
+        $this->app->bind(CoachRepository::class, function () {
+            return new CoachRepository(new Coach());
         });
 
-        $this->app->singleton(PlayerRepository::class, function ($app) {
-            return new PlayerRepository($app->make(Player::class));
+        $this->app->bind(PlayerRepository::class, function () {
+            return new PlayerRepository(new Player());
         });
 
-        $this->app->singleton(RefereeRepository::class, function ($app) {
-            return new RefereeRepository($app->make(Referee::class));
+        $this->app->bind(RefereeRepository::class, function () {
+            return new RefereeRepository(new Referee());
         });
 
-        $this->app->singleton(MessageRepository::class, function ($app) {
-            return new MessageRepository($app->make(Message::class));
+        $this->app->bind(MessageRepository::class, function () {
+            return new MessageRepository(new Message());
         });
 
-        $this->app->singleton(ReservationRepository::class, function ($app) {
-            return new ReservationRepository($app->make(Reservation::class));
+        $this->app->bind(ReservationRepository::class, function () {
+            return new ReservationRepository(new Reservation());
         });
 
-        $this->app->singleton(TimeSlotRepository::class, function ($app) {
-            return new TimeSlotRepository($app->make(TimeSlot::class));
+        $this->app->bind(TimeSlotRepository::class, function () {
+            return new TimeSlotRepository(new TimeSlot());
         });
 
-        $this->app->singleton(ConflictRepository::class, function ($app) {
-            return new ConflictRepository($app->make(Conflict::class));
+        $this->app->bind(ConflictRepository::class, function () {
+            return new ConflictRepository(new Conflict());
         });
 
-        $this->app->singleton(SuggestionRepository::class, function ($app) {
-            return new SuggestionRepository($app->make(Suggestion::class));
+        $this->app->bind(SuggestionRepository::class, function () {
+            return new SuggestionRepository(new Suggestion());
         });
 
-        $this->app->singleton(TournamentRepository::class, function ($app) {
-            return new TournamentRepository($app->make(Tournament::class));
+        $this->app->bind(TournamentRepository::class, function () {
+            return new TournamentRepository(new Tournament());
         });
 
-        $this->app->singleton(PoolRepository::class, function ($app) {
-            return new PoolRepository($app->make(Pool::class));
+        $this->app->bind(PoolRepository::class, function () {
+            return new PoolRepository(new Pool());
         });
 
-        $this->app->singleton(RoundRepository::class, function ($app) {
-            return new RoundRepository($app->make(Round::class));
+        $this->app->bind(RoundRepository::class, function () {
+            return new RoundRepository(new Round());
         });
 
-        $this->app->singleton(LeagueRepository::class, function ($app) {
-            return new LeagueRepository($app->make(League::class));
+        $this->app->bind(LeagueRepository::class, function () {
+            return new LeagueRepository(new League());
         });
 
-        $this->app->singleton(TournamentGroupRepository::class, function ($app) {
-            return new TournamentGroupRepository($app->make(TournamentGroup::class));
+        $this->app->bind(TournamentGroupRepository::class, function () {
+            return new TournamentGroupRepository(new TournamentGroup());
         });
 
-        $this->app->singleton(SystemRepository::class, function ($app) {
-            return new SystemRepository($app->make(System::class));
+        $this->app->bind(SystemRepository::class, function () {
+            return new SystemRepository(new System());
         });
 
-        $this->app->singleton(SeasonSportRepository::class, function ($app) {
-            return new SeasonSportRepository($app->make(SeasonSport::class));
+        $this->app->bind(SeasonSportRepository::class, function () {
+            return new SeasonSportRepository(new SeasonSport());
         });
 
-        $this->app->singleton(PlayerLicenseRepository::class, function ($app) {
-            return new PlayerLicenseRepository($app->make(PlayerLicense::class));
+        $this->app->bind(PlayerLicenseRepository::class, function () {
+            return new PlayerLicenseRepository(new PlayerLicense());
         });
 
-        $this->app->singleton(CoachLicenseRepository::class, function ($app) {
-            return new CoachLicenseRepository($app->make(CoachLicense::class));
+        $this->app->bind(CoachLicenseRepository::class, function () {
+            return new CoachLicenseRepository(new CoachLicense());
         });
 
-        $this->app->singleton(GameRepository::class, function ($app) {
-            return new GameRepository($app->make(Game::class));
+        $this->app->bind(GameRepository::class, function () {
+            return new GameRepository(new Game());
         });
 
-        $this->app->singleton(GamePlanRepository::class, function ($app) {
-            return new GamePlanRepository($app->make(GamePlan::class));
+        $this->app->bind(GamePlanRepository::class, function () {
+            return new GamePlanRepository(new GamePlan());
         });
 
-        $this->app->singleton(GamePenaltyRepository::class, function ($app) {
-            return new GamePenaltyRepository($app->make(GamePenalty::class));
+        $this->app->bind(GamePenaltyRepository::class, function () {
+            return new GamePenaltyRepository(new GamePenalty());
         });
 
-        $this->app->singleton(GameNoteRepository::class, function ($app) {
-            return new GameNoteRepository($app->make(GameNote::class));
+        $this->app->bind(GameNoteRepository::class, function () {
+            return new GameNoteRepository(new GameNote());
         });
 
-        $this->app->singleton(GameDraftRepository::class, function ($app) {
-            return new GameDraftRepository($app->make(GameDraft::class));
+        $this->app->bind(GameDraftRepository::class, function () {
+            return new GameDraftRepository(new GameDraft());
         });
 
-        $this->app->singleton(BlockedPeriodRepository::class, function ($app) {
-            return new BlockedPeriodRepository($app->make(BlockedPeriod::class));
+        $this->app->bind(BlockedPeriodRepository::class, function () {
+            return new BlockedPeriodRepository(new BlockedPeriod());
         });
 
-        $this->app->singleton(TournamentConfigRepository::class, function ($app) {
-            return new TournamentConfigRepository($app->make(TournamentConfig::class));
+        $this->app->bind(TournamentConfigRepository::class, function () {
+            return new TournamentConfigRepository(new TournamentConfig());
         });
 
-        $this->app->singleton(RegionRepository::class, function ($app) {
-            return new RegionRepository($app->make(Region::class));
+        $this->app->bind(RegionRepository::class, function () {
+            return new RegionRepository(new Region());
         });
 
-        $this->app->singleton(ReservationTypeRepository::class, function ($app) {
-            return new ReservationTypeRepository($app->make(ReservationType::class));
+        $this->app->bind(ReservationTypeRepository::class, function () {
+            return new ReservationTypeRepository(new ReservationType());
         });
 
-        $this->app->singleton(UserSeasonSportRepository::class, function ($app) {
-            return new UserSeasonSportRepository($app->make(UserSeasonSport::class));
+        $this->app->bind(UserSeasonSportRepository::class, function () {
+            return new UserSeasonSportRepository(new UserSeasonSport());
         });
 
-        $this->app->singleton(RegistrationRepository::class, function ($app) {
-            return new RegistrationRepository($app->make(Registration::class));
+        $this->app->bind(RegistrationRepository::class, function () {
+            return new RegistrationRepository(new Registration());
         });
 
-        $this->app->singleton(CourtPriorityRepository::class, function ($app) {
-            return new CourtPriorityRepository($app->make(CourtPriority::class));
+        $this->app->bind(CourtPriorityRepository::class, function () {
+            return new CourtPriorityRepository(new CourtPriority());
         });
 
-        $this->app->singleton(CoachHistoryRepository::class, function ($app) {
-            return new CoachHistoryRepository($app->make(CoachHistory::class));
+        $this->app->bind(CoachHistoryRepository::class, function () {
+            return new CoachHistoryRepository(new CoachHistory());
         });
 
-        $this->app->singleton(CoachEducationRepository::class, function ($app) {
-            return new CoachEducationRepository($app->make(CoachEducation::class));
+        $this->app->bind(CoachEducationRepository::class, function () {
+            return new CoachEducationRepository(new CoachEducation());
         });
 
-        $this->app->singleton(TournamentStructureRepository::class, function ($app) {
-            return new TournamentStructureRepository($app->make(TournamentStructure::class));
+        $this->app->bind(TournamentStructureRepository::class, function () {
+            return new TournamentStructureRepository(new TournamentStructure());
         });
 
-        $this->app->singleton(TournamentTypeRepository::class, function ($app) {
-            return new TournamentTypeRepository($app->make(TournamentType::class));
+        $this->app->bind(TournamentTypeRepository::class, function () {
+            return new TournamentTypeRepository(new TournamentType());
         });
 
-        $this->app->singleton(TournamentProgramRepository::class, function ($app) {
-            return new TournamentProgramRepository($app->make(TournamentProgram::class));
+        $this->app->bind(TournamentProgramRepository::class, function () {
+            return new TournamentProgramRepository(new TournamentProgram());
         });
 
-        $this->app->singleton(TournamentRegistrationTypeRepository::class, function ($app) {
-            return new TournamentRegistrationTypeRepository($app->make(TournamentRegistrationType::class));
+        $this->app->bind(TournamentRegistrationTypeRepository::class, function () {
+            return new TournamentRegistrationTypeRepository(new TournamentRegistrationType());
         });
     }
 

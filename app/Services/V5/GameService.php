@@ -11,71 +11,94 @@ use App\Models\V5\ClubVenue;
 use App\Models\V5\VenueSeasonSport;
 use App\Models\V5\Conflict;
 use App\Repositories\V5\GameRepository;
-use App\Services\V5\TournamentService;
-use App\Services\V5\GameDraftService;
-use App\Services\V5\CourtService;
-use App\Services\V5\TimeSlotService;
-use App\Services\V5\TournamentGroupService;
-use App\Services\V5\ClubService;
-use App\Services\V5\ConflictService;
-use App\Services\V5\TournamentConfigsService;
-use App\Services\V5\TeamService;
-use App\Services\V5\ReservationService;
-use App\Services\V5\BlockedPeriodsService;
-use App\Services\V5\SuggestionService;
-use App\Services\V5\MessageService;
-use App\Services\V5\DateUtilsService;
 use Carbon\Carbon;
-use Illuminate\Support\Facades\DB;
 
 class GameService
 {
     protected GameRepository $gameRepository;
-    protected TournamentService $tournamentService;
-    protected GameDraftService $gameDraftService;
-    protected CourtService $courtService;
-    protected TimeSlotService $timeSlotService;
-    protected TournamentGroupService $tournamentGroupService;
-    protected ClubService $clubService;
-    protected ConflictService $conflictService;
-    protected TournamentConfigsService $tournamentConfigService;
-    protected TeamService $teamsService;
-    protected ReservationService $reservationsService;
-    protected BlockedPeriodsService $blockedPeriodsService;
-    protected SuggestionService $suggestionsService;
-    protected MessageService $messageService;
+    protected ?TournamentService $tournamentService = null;
+    protected ?GameDraftService $gameDraftService = null;
+    protected ?CourtService $courtService = null;
+    protected ?TimeSlotService $timeSlotService = null;
+    protected ?TournamentGroupService $tournamentGroupService = null;
+    protected ?ClubService $clubService = null;
+    protected ?ConflictService $conflictService = null;
+    protected ?TournamentConfigsService $tournamentConfigService = null;
+    protected ?TeamService $teamsService = null;
+    protected ?ReservationService $reservationsService = null;
+    protected ?BlockedPeriodsService $blockedPeriodsService = null;
+    protected ?SuggestionService $suggestionsService = null;
+    protected ?MessageService $messageService = null;
 
-    public function __construct(
-        GameRepository           $gameRepository,
-        TournamentService        $tournamentService,
-        GameDraftService         $gameDraftService,
-        CourtService             $courtService,
-        TimeSlotService          $timeSlotService,
-        TournamentGroupService   $tournamentGroupService,
-        ClubService              $clubService,
-        ConflictService          $conflictService,
-        TournamentConfigsService $tournamentConfigService,
-        TeamService              $teamsService,
-        ReservationService       $reservationsService,
-        BlockedPeriodsService    $blockedPeriodsService,
-        SuggestionService        $suggestionsService,
-        MessageService           $messageService
-    )
+    public function __construct(GameRepository $gameRepository)
     {
         $this->gameRepository = $gameRepository;
-        $this->tournamentService = $tournamentService;
-        $this->gameDraftService = $gameDraftService;
-        $this->courtService = $courtService;
-        $this->timeSlotService = $timeSlotService;
-        $this->tournamentGroupService = $tournamentGroupService;
-        $this->clubService = $clubService;
-        $this->conflictService = $conflictService;
-        $this->tournamentConfigService = $tournamentConfigService;
-        $this->teamsService = $teamsService;
-        $this->reservationsService = $reservationsService;
-        $this->blockedPeriodsService = $blockedPeriodsService;
-        $this->suggestionsService = $suggestionsService;
-        $this->messageService = $messageService;
+    }
+
+    // Lazy loading methods for services
+    protected function getTournamentService(): TournamentService
+    {
+        return $this->tournamentService ??= app(TournamentService::class);
+    }
+
+    protected function getGameDraftService(): GameDraftService
+    {
+        return $this->gameDraftService ??= app(GameDraftService::class);
+    }
+
+    protected function getCourtService(): CourtService
+    {
+        return $this->courtService ??= app(CourtService::class);
+    }
+
+    protected function getTimeSlotService(): TimeSlotService
+    {
+        return $this->timeSlotService ??= app(TimeSlotService::class);
+    }
+
+    protected function getTournamentGroupService(): TournamentGroupService
+    {
+        return $this->tournamentGroupService ??= app(TournamentGroupService::class);
+    }
+
+    protected function getClubService(): ClubService
+    {
+        return $this->clubService ??= app(ClubService::class);
+    }
+
+    protected function getConflictService(): ConflictService
+    {
+        return $this->conflictService ??= app(ConflictService::class);
+    }
+
+    protected function getTournamentConfigService(): TournamentConfigsService
+    {
+        return $this->tournamentConfigService ??= app(TournamentConfigsService::class);
+    }
+
+    protected function getTeamsService(): TeamService
+    {
+        return $this->teamsService ??= app(TeamService::class);
+    }
+
+    protected function getReservationsService(): ReservationService
+    {
+        return $this->reservationsService ??= app(ReservationService::class);
+    }
+
+    protected function getBlockedPeriodsService(): BlockedPeriodsService
+    {
+        return $this->blockedPeriodsService ??= app(BlockedPeriodsService::class);
+    }
+
+    protected function getSuggestionsService(): SuggestionService
+    {
+        return $this->suggestionsService ??= app(SuggestionService::class);
+    }
+
+    protected function getMessageService(): MessageService
+    {
+        return $this->messageService ??= app(MessageService::class);
     }
 
     public function findOne(array $condition): ?Game
@@ -118,9 +141,9 @@ class GameService
 
     public function createAllTournamentGames(int $tournamentId, ?int $seasonSportId): array
     {
-        $this->gameDraftService->deleteByCondition(['tournament_id' => $tournamentId]);
+        $this->getGameDraftService()->deleteByCondition(['tournament_id' => $tournamentId]);
 
-        $tournament = $this->tournamentService->findOne([
+        $tournament = $this->getTournamentService()->findOne([
             'where' => [
                 'id' => $tournamentId,
                 'deleted' => false,
@@ -303,7 +326,7 @@ class GameService
                         }
                     }
 
-                    $this->gameDraftService->createMany($gameDraftData);
+                    $this->getGameDraftService()->createMany($gameDraftData);
                 }
             } else {
                 throw new \Exception(
@@ -398,7 +421,7 @@ class GameService
             $game->team_id_away = $homeId;
             $game->save();
 
-            $this->messageService->create([
+            $this->getMessageService()->create([
                 'user_id' => $user->id,
                 'type_id' => 5,
                 'to_id' => $game->id,
@@ -432,7 +455,7 @@ class GameService
         $query->where('season_sport_id', $seasonSportId);
 
         if ($tournamentGroupId) {
-            $tournamentGroup = $this->tournamentGroupService->findOne([
+            $tournamentGroup = $this->getTournamentGroupService()->findOne([
                 'where' => ['id' => $tournamentGroupId],
                 'include' => ['games', 'tournaments'],
             ]);
@@ -447,7 +470,7 @@ class GameService
         }
 
         if ($clubId) {
-            $club = $this->clubService->findOne([
+            $club = $this->getClubService()->findOne([
                 'where' => ['id' => $clubId],
                 'include' => ['teams'],
             ]);
@@ -469,7 +492,7 @@ class GameService
         }
 
         if ($venueId) {
-            $courts = $this->courtService->findAll(['where' => ['venue_id' => $venueId]]);
+            $courts = $this->getCourtService()->findAll(['where' => ['venue_id' => $venueId]]);
             $courtIds = $courts->pluck('id')->toArray();
             $query->whereIn('court_id', $courtIds);
         }
@@ -478,7 +501,7 @@ class GameService
 
         if ($type === 'conflicts' || $type === 'conflictsExcludeTimes') {
             if ($isAdmin) {
-                $conflicts = $this->conflictService->findAll([
+                $conflicts = $this->getConflictService()->findAll([
                     'where' => [
                         'ignore_associations' => false,
                         function ($q) {
@@ -492,14 +515,14 @@ class GameService
                 $query->whereIn('id', $gameIds);
             } else {
                 $userClubs = $user->userRoles()->whereNotNull('club_id')->pluck('club_id')->toArray();
-                $teams = $this->teamsService->findAll(['where' => ['club_id' => ['in' => $userClubs]]]);
+                $teams = $this->getTeamsService()->findAll(['where' => ['club_id' => ['in' => $userClubs]]]);
                 $userTeamIds = $teams->pluck('id')->toArray();
 
-                $conflictsHome = $this->conflictService->findAll([
+                $conflictsHome = $this->getConflictService()->findAll([
                     'where' => ['ignore_home' => false],
                 ]);
 
-                $conflictsAway = $this->conflictService->findAll([
+                $conflictsAway = $this->getConflictService()->findAll([
                     'where' => ['ignore_home' => false],
                 ]);
 
@@ -527,7 +550,7 @@ class GameService
 
             if (!$isAdmin) {
                 $userClubs = $user->userRoles()->whereNotNull('club_id')->pluck('club_id')->toArray();
-                $teams = $this->teamsService->findAll(['where' => ['club_id' => ['in' => $userClubs]]]);
+                $teams = $this->getTeamsService()->findAll(['where' => ['club_id' => ['in' => $userClubs]]]);
                 $teamIds = $teams->pluck('id')->toArray();
 
                 $query->where(function ($q) use ($teamIds) {
@@ -546,7 +569,7 @@ class GameService
 
             $teams = collect();
             if ($clubIds) {
-                $teams = $this->teamsService->findAll(['where' => ['club_id' => ['in' => $clubIds]]]);
+                $teams = $this->getTeamsService()->findAll(['where' => ['club_id' => ['in' => $clubIds]]]);
             }
 
             $userTeams = $user->userRoles()
@@ -557,7 +580,7 @@ class GameService
             $userTeamIds = $teams->pluck('id')->toArray();
 
             if ($userTeams) {
-                $additionalTeams = $this->teamsService->findAll(['where' => ['id' => ['in' => $userTeams]]]);
+                $additionalTeams = $this->getTeamsService()->findAll(['where' => ['id' => ['in' => $userTeams]]]);
                 $userTeamIds = array_merge($userTeamIds, $additionalTeams->pluck('id')->toArray());
             }
 
@@ -636,31 +659,64 @@ class GameService
 
     public function getGamesCount(array $queryParams): int
     {
-        $type = $queryParams['type'] ?? null;
-        $query = Game::query();
+        try {
+            $type = $queryParams['type'] ?? null;
+            $isDeleted = isset($queryParams['isDeleted']) ? filter_var($queryParams['isDeleted'], FILTER_VALIDATE_BOOLEAN) : false;
+            $statusId = $queryParams['statusId'] ?? null;
+            $seasonSportId = $queryParams['seasonSportId'] ?? null;
 
-        if ($type === 'conflicts' || $type === 'conflictsExcludeTimes') {
-            $conflicts = $this->conflictService->findAll([
-                'where' => [
-                    'ignore_associations' => false,
-                    function ($q) {
+            $query = Game::query();
+
+            // Apply isDeleted filter
+            if ($isDeleted === false) {
+                $query->where('is_deleted', false);
+            } elseif ($isDeleted === true) {
+                $query->where('is_deleted', true);
+            }
+
+            // Apply statusId filter
+            if ($statusId !== null && $statusId !== '' && $statusId !== '0') {
+                $query->where('status_id', (int)$statusId);
+            }
+
+            // Apply seasonSportId filter (only if not 0 or empty)
+            if ($seasonSportId !== null && $seasonSportId !== '' && $seasonSportId != '0' && $seasonSportId != 0) {
+                $query->where('season_sport_id', (int)$seasonSportId);
+            }
+
+            if ($type === 'conflicts' || $type === 'conflictsExcludeTimes') {
+                $conflictQuery = Conflict::query()
+                    ->where('ignore_associations', false)
+                    ->where(function ($q) {
                         $q->whereNotNull('start_time')
                             ->orWhereNotNull('blocked_association');
-                    },
-                ],
+                    });
+
+                $gameIds = $conflictQuery->pluck('game_id')->filter()->toArray();
+
+                if (!empty($gameIds)) {
+                    $query->whereIn('id', $gameIds);
+                } else {
+                    // No conflicts found, return 0
+                    return 0;
+                }
+            } elseif ($type === 'attention') {
+                $query->where(function ($q) {
+                    $q->whereNull('court_id')
+                        ->orWhereNull('time')
+                        ->orWhereBetween('status_id', [1, 4]);
+                });
+            }
+
+            return $query->count();
+        } catch (\Exception $e) {
+            \Log::error('Error in getGamesCount', [
+                'message' => $e->getMessage(),
+                'trace' => $e->getTraceAsString(),
+                'queryParams' => $queryParams
             ]);
-
-            $gameIds = $conflicts->pluck('game_id')->toArray();
-            $query->whereIn('id', $gameIds);
-        } elseif ($type === 'attention') {
-            $query->where(function ($q) {
-                $q->whereNull('court_id')
-                    ->orWhereNull('time')
-                    ->orWhereBetween('status_id', [1, 4]);
-            });
+            throw $e;
         }
-
-        return $query->count();
     }
 
     public function deleteGame(int $id, User $user): bool
@@ -670,7 +726,7 @@ class GameService
             $game->is_deleted = true;
             $game->save();
 
-            $this->messageService->create([
+            $this->getMessageService()->create([
                 'user_id' => $user->id,
                 'type_id' => 13,
                 'to_id' => $id,
@@ -692,7 +748,7 @@ class GameService
 
             if ($message) {
                 $cancelMessage = "The match has been POSTPONED by " . ($user->name ?? $user->email) . " due to current circumstances. The association will decide on the status of the match in the near future";
-                $this->messageService->create([
+                $this->getMessageService()->create([
                     'user_id' => $user->id,
                     'type_id' => 8,
                     'to_id' => $gameId,
@@ -700,7 +756,7 @@ class GameService
                     'html' => $cancelMessage,
                 ]);
 
-                $this->messageService->create([
+                $this->getMessageService()->create([
                     'user_id' => $user->id,
                     'type_id' => 12,
                     'to_id' => $gameId,
@@ -708,7 +764,7 @@ class GameService
                     'html' => $cancelMessage,
                 ]);
 
-                $this->messageService->create([
+                $this->getMessageService()->create([
                     'user_id' => 1473, // MVP Admin id
                     'type_id' => 1,
                     'to_id' => 1874, // Lars account id
@@ -716,7 +772,7 @@ class GameService
                     'html' => ($user->name ?? $user->email) . " has cancelled match {$game->number} ({$game->tournament->short_name}). The has been given the status POSTPONED. You should check the correspondence of the match to determine the result",
                 ]);
 
-                $this->messageService->create([
+                $this->getMessageService()->create([
                     'user_id' => $user->id,
                     'type_id' => 5,
                     'to_id' => $gameId,
@@ -724,7 +780,7 @@ class GameService
                     'html' => $message,
                 ]);
             } else {
-                $this->messageService->create([
+                $this->getMessageService()->create([
                     'user_id' => $user->id,
                     'type_id' => 10,
                     'to_id' => $gameId,
@@ -732,7 +788,7 @@ class GameService
                     'html' => "Match {$game->number} has been given the status <strong>STOPPED</strong> by " . ($user->name ?? $user->email) . " <br /><br />This means that the planned date (see below) is no longer valid. The parties to the match will set a new time as soon as possible.<br /><br />Remember that you can follow the teams from the MVP App which can be downloaded from the App Store and Google Play",
                 ]);
 
-                $this->messageService->create([
+                $this->getMessageService()->create([
                     'user_id' => $user->id,
                     'type_id' => 12,
                     'to_id' => $gameId,
@@ -740,7 +796,7 @@ class GameService
                     'html' => "The match has been POSTPONED by " . ($user->name ?? $user->email),
                 ]);
 
-                $this->messageService->create([
+                $this->getMessageService()->create([
                     'user_id' => $user->id,
                     'type_id' => 1,
                     'to_id' => 1874, // Lars account id
@@ -758,7 +814,7 @@ class GameService
     {
         $game = $this->findOne(['where' => ['id' => $id]]);
         if ($game) {
-            $club = $this->clubService->findOne(['where' => ['id' => $data['clubId']]]);
+            $club = $this->getClubService()->findOne(['where' => ['id' => $data['clubId']]]);
             if ($club) {
                 $game->organizer_club_id = $club->id;
                 $game->save();
@@ -769,7 +825,7 @@ class GameService
                         ->update(['organizer_club_id' => $club->id]);
                 }
 
-                $this->messageService->create([
+                $this->getMessageService()->create([
                     'user_id' => $user->id,
                     'type_id' => 5,
                     'to_id' => $game->id,
@@ -797,7 +853,7 @@ class GameService
 
         $venueSeasonSports = VenueSeasonSport::where('season_sport_id', $game->season_sport_id)->get();
 
-        $additionalCourts = $this->courtService->findAll([
+        $additionalCourts = $this->getCourtService()->findAll([
             'where' => [
                 'venue_id' => ['in' => $venueSeasonSports->pluck('venue_id')->toArray()],
             ],
@@ -805,14 +861,14 @@ class GameService
         ]);
 
         if ($clubVenuesForHomeTeam->count() || $clubVenuesForGuestTeam->count()) {
-            $courtsHomeTeam = $this->courtService->findAll([
+            $courtsHomeTeam = $this->getCourtService()->findAll([
                 'where' => [
                     'venue_id' => ['in' => $clubVenuesForHomeTeam->pluck('venue_id')->toArray()],
                 ],
                 'include' => ['venue'],
             ]);
 
-            $courtsGuestTeam = $this->courtService->findAll([
+            $courtsGuestTeam = $this->getCourtService()->findAll([
                 'where' => [
                     'venue_id' => ['in' => $clubVenuesForGuestTeam->pluck('venue_id')->toArray()],
                 ],
@@ -975,7 +1031,7 @@ class GameService
         }
 
         if ($tournamentGroupId) {
-            $tournamentGroup = $this->tournamentGroupService->findOne([
+            $tournamentGroup = $this->getTournamentGroupService()->findOne([
                 'where' => ['id' => $tournamentGroupId],
                 'include' => ['games', 'tournaments'],
             ]);
@@ -996,7 +1052,7 @@ class GameService
 
     protected function getTeamsByClub(int $clubId): array
     {
-        $club = $this->clubService->findOne([
+        $club = $this->getClubService()->findOne([
             'where' => ['id' => $clubId],
             'include' => ['teams'],
         ]);
@@ -1026,7 +1082,7 @@ class GameService
         $suggestionId = $checkGameDto['suggestionId'] ?? null;
 
         if ($suggestionId) {
-            $suggestion = $this->suggestionsService->findOne(['where' => ['id' => $suggestionId]]);
+            $suggestion = $this->getSuggestionsService()->findOne(['where' => ['id' => $suggestionId]]);
             if ($suggestion) {
                 $time = $suggestion->time;
                 $date = $suggestion->date;
@@ -1045,9 +1101,9 @@ class GameService
 
         $courtIds = [];
         if ($courtId) {
-            $court = $this->courtService->findOne(['where' => ['id' => $courtId]]);
+            $court = $this->getCourtService()->findOne(['where' => ['id' => $courtId]]);
             if ($court) {
-                $courtBlocks = $this->courtService->findAll([
+                $courtBlocks = $this->getCourtService()->findAll([
                     'where' => [
                         function ($q) use ($courtId, $court) {
                             $q->where('parent_id', $courtId)
@@ -1071,7 +1127,7 @@ class GameService
         if ($date) {
             $gameDate = Carbon::parse($date);
 
-            $blockedPeriod = $this->blockedPeriodsService->findOne([
+            $blockedPeriod = $this->getBlockedPeriodsService()->findOne([
                 'where' => [
                     function ($q) use ($game) {
                         $q->where('block_all', true)
@@ -1143,7 +1199,7 @@ class GameService
         if ($time && $courtId) {
             $endTime = Carbon::parse($time)->addMinutes(90)->format('H:i');
 
-            $reservation = $this->reservationsService->findOne([
+            $reservation = $this->getReservationsService()->findOne([
                 'where' => [
                     'is_deleted' => false,
                     function ($q) use ($game) {
@@ -1222,7 +1278,7 @@ class GameService
         }
 
         if ($courtId && $date) {
-            $venueId = $this->courtService->findOne(['where' => ['id' => $courtId]])?->venue_id;
+            $venueId = $this->getCourtService()->findOne(['where' => ['id' => $courtId]])?->venue_id;
 
             $checkHome = ClubVenue::where('venue_id', $venueId)
                 ->where('club_id', $game->homeTeam->club_id)
@@ -1240,7 +1296,7 @@ class GameService
                 $checkClubId = $game->guestTeam->club_id;
             }
 
-            $times = $this->timeSlotService->findAll([
+            $times = $this->getTimeSlotService()->findAll([
                 'where' => [
                     'is_deleted' => false,
                     'club_id' => $checkClubId,

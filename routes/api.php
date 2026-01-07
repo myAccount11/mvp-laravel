@@ -154,6 +154,7 @@ Route::middleware(['jwt.auth'])->group(function () {
         Route::prefix('messages')->group(function () {
             Route::get('/', [\App\Http\Controllers\Api\V5\MessageController::class, 'getAll']);
             Route::get('/count', [\App\Http\Controllers\Api\V5\MessageController::class, 'getMessagesCount']);
+            Route::get('/counts', [\App\Http\Controllers\Api\V5\MessageController::class, 'getMessagesCount']);
             Route::post('/', [\App\Http\Controllers\Api\V5\MessageController::class, 'create']);
             Route::get('/{id}', [\App\Http\Controllers\Api\V5\MessageController::class, 'getById'])->where('id', '[0-9]+');
             Route::put('/{id}', [\App\Http\Controllers\Api\V5\MessageController::class, 'update'])->where('id', '[0-9]+');
