@@ -9,7 +9,7 @@ class TeamTournament extends Model
 {
     use HasFactory;
 
-    protected $table = 'team_tournament';
+    protected $table = 'team_tournaments';
 
     public $timestamps = false;
 

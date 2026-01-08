@@ -35,7 +35,10 @@ class RoundService
 
     public function createMany(array $data): \Illuminate\Support\Collection
     {
-        $tournamentId = $data['tournament_id'];
+        // Convert 0 to null for tournament_id (foreign key constraint)
+        $tournamentId = ($data['tournament_id'] === 0 || $data['tournament_id'] === '0' || empty($data['tournament_id'])) 
+            ? null 
+            : $data['tournament_id'];
         $startDate = Carbon::parse($data['start_date']);
         $endDate = Carbon::parse($data['end_date']);
 
@@ -95,8 +98,13 @@ class RoundService
 
         $roundIds = collect($data)->pluck('id')->toArray();
         $tournamentId = $data[0]['tournament_id'] ?? null;
+        
+        // Convert 0 to null for tournament_id (foreign key constraint)
+        if ($tournamentId === 0 || $tournamentId === '0') {
+            $tournamentId = null;
+        }
 
-        if ($tournamentId) {
+        if ($tournamentId !== null) {
             $this->roundRepository->query()->whereIn('id', $roundIds)
                 ->update(['tournament_id' => $tournamentId]);
         }

@@ -8,8 +8,6 @@ use App\Http\Requests\V5\UpdateLeagueRequest;
 use App\Services\V5\LeagueService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
-use App\Models\V5\Organizer;
-use App\Models\V5\Club;
 use Illuminate\Support\Facades\Auth;
 
 class LeagueController extends Controller
@@ -24,20 +22,39 @@ class LeagueController extends Controller
     public function create(CreateLeagueRequest $request): JsonResponse
     {
         $league = $this->leagueService->create($request->validated());
+        $league->load(['organizer', 'club']);
         return response()->json($league, 201);
     }
 
     public function getAll(Request $request): JsonResponse
     {
-        $orderBy = $request->query('orderBy', 'id');
-        $orderDirection = $request->query('orderDirection', 'ASC');
+        $orderBy = $request->query('order_by', 'id');
+        $orderDirection = $request->query('order_direction', 'ASC');
+        $seasonSportId = $request->query('season_sport_id');
+        $deleted = $request->query('deleted');
 
         $conditions = [
             'where' => [],
-            'include' => [Organizer::class, Club::class],
+            'include' => ['organizer', 'club'],
             'orderBy' => $orderBy,
             'orderDirection' => $orderDirection,
         ];
+
+        // Handle deleted filter
+        if ($deleted !== null) {
+            $deletedValue = filter_var($deleted, FILTER_VALIDATE_BOOLEAN, FILTER_NULL_ON_FAILURE);
+            if ($deletedValue !== null) {
+                $conditions['where'][] = ['deleted', '=', $deletedValue];
+            }
+        } else {
+            // Default to false if not specified
+            $conditions['where'][] = ['deleted', '=', false];
+        }
+
+        // Handle seasonSportId filter
+        if ($seasonSportId !== null && $seasonSportId !== '' && $seasonSportId != '0' && $seasonSportId != 0) {
+            $conditions['where'][] = ['season_sport_id', '=', (int)$seasonSportId];
+        }
 
         $user = Auth::user();
         if ($user) {
@@ -61,6 +78,7 @@ class LeagueController extends Controller
         }
 
         $leagues = $this->leagueService->findAll($conditions);
+        
         return response()->json($leagues);
     }
 
@@ -79,6 +97,7 @@ class LeagueController extends Controller
         if (!$league) {
             return response()->json(['message' => 'League not found'], 404);
         }
+        $league->load(['organizer', 'club']);
         return response()->json($league);
     }
 
@@ -88,7 +107,10 @@ class LeagueController extends Controller
         if (!$updated) {
             return response()->json(['message' => 'League not found or no changes made'], 404);
         }
-        return response()->json(['message' => 'League updated successfully']);
+        
+        $league = $this->leagueService->findOne(['id' => $id]);
+        $league->load(['organizer', 'club']);
+        return response()->json($league);
     }
 }
 

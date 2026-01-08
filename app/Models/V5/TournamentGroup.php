@@ -104,4 +104,37 @@ class TournamentGroup extends Model
     {
         return $this->hasMany(Tournament::class, 'tournament_group_id');
     }
+
+    public function tournamentType()
+    {
+        return $this->belongsTo(TournamentType::class, 'tournament_type_id');
+    }
+
+    public function tournamentStructure()
+    {
+        return $this->belongsTo(TournamentStructure::class, 'tournament_structure_id');
+    }
+
+    public function tournamentRegistrationType()
+    {
+        return $this->belongsTo(TournamentRegistrationType::class, 'tournament_registration_type_id');
+    }
+
+    public function region()
+    {
+        return $this->belongsTo(Region::class, 'region_id');
+    }
+
+    /**
+     * Set the region_id attribute, converting 0 to null
+     */
+    public function setRegionIdAttribute($value)
+    {
+        // Convert 0, '0', or empty string to null
+        if ($value == 0 || $value === '0' || $value === '') {
+            $this->attributes['region_id'] = null;
+        } else {
+            $this->attributes['region_id'] = $value;
+        }
+    }
 }

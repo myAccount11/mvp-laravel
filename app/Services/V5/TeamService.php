@@ -13,23 +13,34 @@ use App\Models\V5\User;
 class TeamService
 {
     protected $teamRepository;
-    protected $userService;
-    protected $personService;
-    protected $playerService;
-    protected $messageService;
+    protected ?UserService $userService = null;
+    protected ?PersonService $personService = null;
+    protected ?PlayerService $playerService = null;
+    protected ?MessageService $messageService = null;
 
-    public function __construct(
-        TeamRepository $teamRepository,
-        UserService $userService,
-        PersonService $personService,
-        PlayerService $playerService,
-        MessageService $messageService
-    ) {
+    public function __construct(TeamRepository $teamRepository)
+    {
         $this->teamRepository = $teamRepository;
-        $this->userService = $userService;
-        $this->personService = $personService;
-        $this->playerService = $playerService;
-        $this->messageService = $messageService;
+    }
+
+    protected function getUserService(): UserService
+    {
+        return $this->userService ??= app(UserService::class);
+    }
+
+    protected function getPersonService(): PersonService
+    {
+        return $this->personService ??= app(PersonService::class);
+    }
+
+    protected function getPlayerService(): PlayerService
+    {
+        return $this->playerService ??= app(PlayerService::class);
+    }
+
+    protected function getMessageService(): MessageService
+    {
+        return $this->messageService ??= app(MessageService::class);
     }
 
     public function create(array $data)
@@ -50,7 +61,34 @@ class TeamService
         $query = $this->teamRepository->query();
 
         if (isset($conditions['where'])) {
-            $query->where($conditions['where']);
+            if (is_array($conditions['where'])) {
+                // Handle array of conditions like [['id', 'not in', $array], ['id', 'in', $array]]
+                foreach ($conditions['where'] as $whereCondition) {
+                    if (is_array($whereCondition)) {
+                        if (count($whereCondition) === 3) {
+                            $column = $whereCondition[0];
+                            $operator = strtolower($whereCondition[1]);
+                            $value = $whereCondition[2];
+
+                            if ($operator === 'not in') {
+                                $query->whereNotIn($column, is_array($value) ? $value : [$value]);
+                            } elseif ($operator === 'in') {
+                                $query->whereIn($column, is_array($value) ? $value : [$value]);
+                            } else {
+                                $query->where($column, $operator, $value);
+                            }
+                        } elseif (count($whereCondition) === 2) {
+                            $query->where($whereCondition[0], $whereCondition[1]);
+                        }
+                    } else {
+                        // Handle simple key-value pairs
+                        $query->where($whereCondition);
+                    }
+                }
+            } else {
+                // Handle simple where condition
+                $query->where($conditions['where']);
+            }
         }
 
         if (isset($conditions['include'])) {
@@ -65,11 +103,38 @@ class TeamService
 
         if (isset($conditions['order'])) {
             foreach ($conditions['order'] as $order) {
-                $query->orderBy($order[0], $order[1] ?? 'ASC');
+                // Normalize camelCase to snake_case for order column
+                $orderColumn = $this->normalizeOrderBy($order[0]);
+                $query->orderBy($orderColumn, $order[1] ?? 'ASC');
             }
         }
 
+        // Also handle order_by if provided
+        if (isset($conditions['order_by'])) {
+            $orderBy = $this->normalizeOrderBy($conditions['order_by']);
+            $orderDirection = $conditions['order_direction'] ?? 'ASC';
+            $query->orderBy($orderBy, $orderDirection);
+        }
+
         return $query->get();
+    }
+
+    /**
+     * Normalize camelCase order_by parameter to snake_case
+     */
+    protected function normalizeOrderBy(string $orderBy): string
+    {
+        $fieldMap = [
+            'tournamentName' => 'tournament_name',
+            'localName' => 'local_name',
+            'clubId' => 'club_id',
+            'ageGroup' => 'age_group',
+            'officialTypeId' => 'official_type_id',
+            'officialTeamId' => 'official_team_id',
+            'clubRank' => 'club_rank',
+        ];
+
+        return $fieldMap[$orderBy] ?? $orderBy;
     }
 
     public function findOne(array $conditions)
@@ -143,10 +208,10 @@ class TeamService
 
     public function addUserToTeam($teamId, array $data, User $authUser)
     {
-        $user = $this->userService->findOne(['email' => $data['email']]);
-        
+        $user = $this->getUserService()->findOne(['email' => $data['email']]);
+
         if (!$user) {
-            $user = $this->userService->createUser([
+            $user = $this->getUserService()->createUser([
                 'name' => $data['name'],
                 'email' => $data['email'],
                 'disable_emails' => false,
@@ -179,10 +244,10 @@ class TeamService
                 ]);
             }
 
-            $this->personService->syncUserWithPerson($user->id, $data['season_sport_id']);
+            $this->getPersonService()->syncUserWithPerson($user->id, $data['season_sport_id']);
 
             if (isset($data['number'])) {
-                $player = $this->playerService->findByUserId($user->id);
+                $player = $this->getPlayerService()->findByUserId($user->id);
                 if ($player) {
                     DB::table('player')
                         ->where('id', $player->id)
@@ -191,7 +256,7 @@ class TeamService
             }
 
             if ($authUser->id !== $user->id) {
-                $this->messageService->create([
+                $this->getMessageService()->create([
                     'type_id' => 1,
                     'to_id' => $user->id,
                     'user_id' => 1473,

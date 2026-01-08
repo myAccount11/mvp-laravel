@@ -3,6 +3,8 @@
 namespace App\Http\Controllers\Api\V5;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\V5\CreateTournamentGroupRequest;
+use App\Http\Requests\V5\UpdateTournamentGroupRequest;
 use App\Services\V5\TournamentGroupService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -16,17 +18,43 @@ class TournamentGroupController extends Controller
         $this->tournamentGroupService = $tournamentGroupService;
     }
 
-    public function create(Request $request): JsonResponse
+    public function create(CreateTournamentGroupRequest $request): JsonResponse
     {
-        $tournamentGroup = $this->tournamentGroupService->create($request->all());
+        $tournamentGroup = $this->tournamentGroupService->create($request->validated());
+        $tournamentGroup->load(['league', 'tournamentConfig']);
         return response()->json($tournamentGroup, 201);
     }
 
     public function getAll(Request $request): JsonResponse
     {
-        $queryParams = $request->all();
-        $result = $this->tournamentGroupService->findAndCountAll($queryParams);
-        return response()->json($result);
+        $orderBy = $request->query('order_by', 'id');
+        $orderDirection = $request->query('order_direction', 'ASC');
+        $page = $request->query('page', 1);
+        $limit = $request->query('limit', 20);
+        $searchTerm = $request->query('search_term');
+        $leagueId = $request->query('league_id');
+
+        $conditions = [
+            'orderBy' => $orderBy,
+            'orderDirection' => $orderDirection,
+            'page' => (int)$page,
+            'limit' => (int)$limit,
+        ];
+
+        if ($searchTerm && trim($searchTerm) !== '') {
+            $conditions['searchTerm'] = trim($searchTerm);
+        }
+
+        if ($leagueId && $leagueId !== '' && $leagueId !== '0') {
+            $conditions['leagueId'] = (int)$leagueId;
+        }
+
+        $result = $this->tournamentGroupService->findAndCountAll($conditions);
+        
+        return response()->json([
+            'rows' => $result['rows'],
+            'count' => $result['count']
+        ]);
     }
 
     public function getNames(Request $request): JsonResponse
@@ -76,10 +104,17 @@ class TournamentGroupController extends Controller
         return response()->json($teams);
     }
 
-    public function update(int $id, Request $request): JsonResponse
+    public function update(int $id, UpdateTournamentGroupRequest $request): JsonResponse
     {
-        $result = $this->tournamentGroupService->update($id, $request->all());
-        return response()->json($result);
+        $result = $this->tournamentGroupService->update($id, $request->validated());
+        if ($result) {
+            $tournamentGroup = $this->tournamentGroupService->findOne([
+                'where' => ['id' => $id],
+                'include' => ['league', 'tournamentConfig'],
+            ]);
+            return response()->json($tournamentGroup);
+        }
+        return response()->json(['message' => 'Tournament group not found or update failed'], 404);
     }
 }
 

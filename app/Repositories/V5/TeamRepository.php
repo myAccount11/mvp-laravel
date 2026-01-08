@@ -36,21 +36,23 @@ class TeamRepository extends BaseRepository
         }
 
         if (isset($conditions['team_ids'])) {
-            $teamIds = is_array($conditions['team_ids']) 
-                ? $conditions['team_ids'] 
+            $teamIds = is_array($conditions['team_ids'])
+                ? $conditions['team_ids']
                 : json_decode($conditions['team_ids'], true);
             if (is_array($teamIds) && count($teamIds) > 0) {
                 $query->whereIn('id', $teamIds);
             }
         }
 
-        if (isset($conditions['season_sport_id'])) {
+        if (isset($conditions['season_sport_id']) && !!$conditions['season_sport_id']) {
             $query->whereHas('teamSeasonSports', function($q) use ($conditions) {
                 $q->where('season_sport_id', $conditions['season_sport_id']);
             });
         }
 
         $orderBy = $conditions['order_by'] ?? 'id';
+        // Normalize camelCase to snake_case for order_by
+        $orderBy = $this->normalizeOrderBy($orderBy);
         $orderDirection = $conditions['order_direction'] ?? 'ASC';
         $query->orderBy($orderBy, $orderDirection);
 
@@ -70,6 +72,24 @@ class TeamRepository extends BaseRepository
     public function getLastLicense()
     {
         return $this->model->orderBy('license', 'desc')->value('license') ?? 0;
+    }
+
+    /**
+     * Normalize camelCase order_by parameter to snake_case
+     */
+    protected function normalizeOrderBy(string $orderBy): string
+    {
+        $fieldMap = [
+            'tournamentName' => 'tournament_name',
+            'localName' => 'local_name',
+            'clubId' => 'club_id',
+            'ageGroup' => 'age_group',
+            'officialTypeId' => 'official_type_id',
+            'officialTeamId' => 'official_team_id',
+            'clubRank' => 'club_rank',
+        ];
+
+        return $fieldMap[$orderBy] ?? $orderBy;
     }
 }
 

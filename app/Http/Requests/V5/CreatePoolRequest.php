@@ -16,7 +16,7 @@ class CreatePoolRequest extends FormRequest
         return [
             '*.id' => 'nullable|integer',
             '*.name' => 'required|string',
-            '*.tournament_id' => 'required|integer|exists:tournaments,id',
+            '*.tournament_id' => 'required|integer',
             '*.games_between' => 'required|integer',
             '*.teams_count' => 'required|integer',
             '*.deleted' => 'nullable|boolean',

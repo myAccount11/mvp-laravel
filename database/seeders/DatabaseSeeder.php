@@ -20,6 +20,8 @@ class DatabaseSeeder extends Seeder
             SeasonsSeeder::class,         // Needed by SeasonSportSeeder
             SeasonSportSeeder::class,     // Depends on SeasonsSeeder and SportsSeeder
             SuperUserSeeder::class,       // Depends on RolesSeeder
+            TournamentTypesSeeder::class, // Depends on SeasonSportSeeder (needs season_sport_id = 2)
+            RegionsSeeder::class,         // Depends on SeasonSportSeeder (needs season_sport_id)
         ]);
     }
 }

@@ -17,7 +17,7 @@ class CreatePersonRequest extends FormRequest
             'external_id' => 'nullable|integer',
             'email' => 'nullable|email',
             'name' => 'nullable|string',
-            'season_sport_id' => 'nullable|integer|exists:season_sport,id',
+            'season_sport_id' => 'nullable|integer|exists:season_sports,id',
             'deleted' => 'nullable|boolean',
             'user_id' => 'nullable|integer|exists:users,id',
             'address_line1' => 'nullable|string',

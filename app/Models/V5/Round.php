@@ -4,7 +4,6 @@ namespace App\Models\V5;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-
 class Round extends Model
 {
     use HasFactory;
@@ -36,6 +35,14 @@ class Round extends Model
         'force_cross' => 'boolean',
         'deleted' => 'boolean',
     ];
+
+    /**
+     * Mutator to convert 0, '0', or empty string to null for tournament_id
+     */
+    public function setTournamentIdAttribute($value): void
+    {
+        $this->attributes['tournament_id'] = ($value === 0 || $value === '0' || $value === '') ? null : $value;
+    }
 
     public function tournament()
     {

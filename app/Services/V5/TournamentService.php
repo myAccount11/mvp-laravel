@@ -14,16 +14,22 @@ class TournamentService
 {
     protected TournamentRepository $tournamentRepository;
     protected PoolRepository $poolRepository;
-    protected TeamService $teamService;
+    protected ?TeamService $teamService = null;
 
     public function __construct(
         TournamentRepository $tournamentRepository,
-        PoolRepository $poolRepository,
-        TeamService $teamService
+        PoolRepository $poolRepository
     ) {
         $this->tournamentRepository = $tournamentRepository;
         $this->poolRepository = $poolRepository;
-        $this->teamService = $teamService;
+    }
+
+    /**
+     * Lazy load TeamService to avoid deep dependency resolution
+     */
+    protected function getTeamService(): TeamService
+    {
+        return $this->teamService ??= app(TeamService::class);
     }
 
     public function findOne(array $condition): ?Tournament
@@ -63,18 +69,31 @@ class TournamentService
             ->where('id', $id)
             ->first();
 
-        if (!$tournament) {
+        if (!$tournament || !$tournament->tournamentGroup) {
             return collect([]);
         }
 
         $allTeams = $tournament->tournamentGroup->teams->pluck('id')->toArray();
         $existingTeams = $tournament->teams->pluck('id')->toArray();
 
-        return $this->teamService->findAll([
-            'where' => [
-                ['id', 'not in', $existingTeams],
-                ['id', 'in', $allTeams],
-            ],
+        // If no teams in tournament group, return empty collection
+        if (empty($allTeams)) {
+            return collect([]);
+        }
+
+        // Build where conditions
+        $whereConditions = [];
+        
+        // Always filter by teams in the tournament group
+        $whereConditions[] = ['id', 'in', $allTeams];
+        
+        // Only exclude existing teams if there are any
+        if (!empty($existingTeams)) {
+            $whereConditions[] = ['id', 'not in', $existingTeams];
+        }
+
+        return $this->getTeamService()->findAll([
+            'where' => $whereConditions,
         ]);
     }
 
@@ -82,8 +101,16 @@ class TournamentService
     {
         $query = $this->tournamentRepository->query();
 
-        if (isset($conditions['where'])) {
-            $query->where($conditions['where']);
+        if (isset($conditions['where']) && is_array($conditions['where'])) {
+            foreach ($conditions['where'] as $whereCondition) {
+                if (is_array($whereCondition)) {
+                    if (count($whereCondition) === 3) {
+                        $query->where($whereCondition[0], $whereCondition[1], $whereCondition[2]);
+                    } elseif (count($whereCondition) === 2) {
+                        $query->where($whereCondition[0], $whereCondition[1]);
+                    }
+                }
+            }
         }
 
         if (isset($conditions['searchTerm'])) {
@@ -94,14 +121,25 @@ class TournamentService
             });
         }
 
-        $query->with($conditions['include'] ?? []);
+        // Get count before adding relationships and pagination
+        $count = (clone $query)->count();
 
-        $count = $query->count();
+        // Add relationships
+        if (isset($conditions['include']) && is_array($conditions['include'])) {
+            $query->with($conditions['include']);
+        }
 
+        // Apply ordering
         $query->orderBy($conditions['orderBy'] ?? 'id', $conditions['orderDirection'] ?? 'ASC');
-        $query->limit($conditions['limit'] ?? 20);
-        $query->offset(((($conditions['page'] ?? 1) - 1) * ($conditions['limit'] ?? 20)));
+        
+        // Apply pagination
+        $limit = (int)($conditions['limit'] ?? 20);
+        $page = (int)($conditions['page'] ?? 1);
+        $offset = ($page - 1) * $limit;
+        $query->limit($limit);
+        $query->offset($offset);
 
+        // Get results
         $rows = $query->get();
 
         return ['rows' => $rows, 'count' => $count];

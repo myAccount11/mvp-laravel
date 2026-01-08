@@ -18,7 +18,7 @@ class PlayerLicenseRequest extends FormRequest
             'start' => 'nullable|date',
             'end' => 'nullable|date',
             'on_contract' => 'nullable|boolean',
-            'season_sport_id' => 'nullable|integer|exists:season_sport,id',
+            'season_sport_id' => 'nullable|integer|exists:season_sports,id',
             'user_id' => 'nullable|integer|exists:users,id',
         ];
     }

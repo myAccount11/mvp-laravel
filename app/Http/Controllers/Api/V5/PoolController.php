@@ -33,8 +33,9 @@ class PoolController extends Controller
     public function getAll(Request $request): JsonResponse
     {
         $conditions = [];
-        if ($request->has('tournament_id')) {
-            $conditions['where'] = ['tournament_id' => $request->query('tournament_id')];
+        $tournamentId = $request->query('tournament_id');
+        if ($tournamentId) {
+            $conditions['where'] = ['tournament_id' => $tournamentId];
         }
         $pools = $this->poolService->findAll($conditions);
         return response()->json($pools);

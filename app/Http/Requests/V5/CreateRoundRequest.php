@@ -14,7 +14,7 @@ class CreateRoundRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'tournament_id' => 'required|integer|exists:tournaments,id',
+            'tournament_id' => 'nullable|integer',
             'start_date' => 'nullable|date',
             'end_date' => 'nullable|date',
         ];

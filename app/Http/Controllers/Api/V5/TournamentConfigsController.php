@@ -3,6 +3,8 @@
 namespace App\Http\Controllers\Api\V5;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\V5\CreateTournamentConfigRequest;
+use App\Http\Requests\V5\UpdateTournamentConfigRequest;
 use App\Services\V5\TournamentConfigsService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -16,9 +18,9 @@ class TournamentConfigsController extends Controller
         $this->tournamentConfigsService = $tournamentConfigsService;
     }
 
-    public function create(Request $request): JsonResponse
+    public function create(CreateTournamentConfigRequest $request): JsonResponse
     {
-        $tournamentConfig = $this->tournamentConfigsService->create($request->all());
+        $tournamentConfig = $this->tournamentConfigsService->create($request->validated());
         return response()->json($tournamentConfig, 201);
     }
 
@@ -55,9 +57,9 @@ class TournamentConfigsController extends Controller
         return response()->json($tournamentConfig);
     }
 
-    public function update(int $id, Request $request): JsonResponse
+    public function update(int $id, UpdateTournamentConfigRequest $request): JsonResponse
     {
-        $result = $this->tournamentConfigsService->update($id, $request->all());
+        $result = $this->tournamentConfigsService->update($id, $request->validated());
         return response()->json($result);
     }
 }

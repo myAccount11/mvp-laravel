@@ -13,5 +13,10 @@ class TournamentStructure extends Model
     protected $fillable = [
         'name',
     ];
+
+    public function tournamentGroups()
+    {
+        return $this->hasMany(TournamentGroup::class, 'tournament_structure_id');
+    }
 }
 

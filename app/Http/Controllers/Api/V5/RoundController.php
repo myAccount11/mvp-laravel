@@ -60,15 +60,15 @@ class RoundController extends Controller
 
     public function deleteGeneratedRounds(Request $request): JsonResponse
     {
-        $tournamentId = $request->query('tournamentId');
+        $tournamentId = $request->query('tournament_id');
         if (!$tournamentId) {
-            return response()->json(['message' => 'tournamentId is required'], 400);
+            return response()->json(['message' => 'tournament_id is required'], 400);
         }
 
         $deleted = $this->roundService->destroyByCondition([
             'where' => ['tournament_id' => $tournamentId],
         ]);
-        return response()->json(['message' => "Deleted {$deleted} rounds"]);
+        return response()->json(['deleted' => $deleted, 'message' => "Deleted {$deleted} rounds"]);
     }
 
     public function deleteGeneratedRoundsByIds(Request $request): JsonResponse
@@ -81,7 +81,7 @@ class RoundController extends Controller
         $deleted = $this->roundService->destroyByCondition([
             'where' => [['id', 'IN', $rounds]],
         ]);
-        return response()->json(['message' => "Deleted {$deleted} rounds"]);
+        return response()->json(['deleted' => $deleted, 'message' => "Deleted {$deleted} rounds"]);
     }
 
     public function destroy(int $id): JsonResponse

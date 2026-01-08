@@ -14,30 +14,45 @@ use App\Models\V5\User;
 
 class RoleService
 {
-    protected $roleRepository;
-    protected $userRoleRepository;
-    protected $userService;
-    protected $teamService;
-    protected $clubService;
-    protected $personService;
-    protected $messageService;
+    protected RoleRepository $roleRepository;
+    protected UserRoleRepository $userRoleRepository;
+    protected ?UserService $userService = null;
+    protected ?TeamService $teamService = null;
+    protected ?ClubService $clubService = null;
+    protected ?PersonService $personService = null;
+    protected ?MessageService $messageService = null;
 
     public function __construct(
         RoleRepository $roleRepository,
-        UserRoleRepository $userRoleRepository,
-        UserService $userService,
-        TeamService $teamService,
-        ClubService $clubService,
-        PersonService $personService,
-        MessageService $messageService
+        UserRoleRepository $userRoleRepository
     ) {
         $this->roleRepository = $roleRepository;
         $this->userRoleRepository = $userRoleRepository;
-        $this->userService = $userService;
-        $this->teamService = $teamService;
-        $this->clubService = $clubService;
-        $this->personService = $personService;
-        $this->messageService = $messageService;
+    }
+
+    protected function getUserService(): UserService
+    {
+        return $this->userService ??= app(UserService::class);
+    }
+
+    protected function getTeamService(): TeamService
+    {
+        return $this->teamService ??= app(TeamService::class);
+    }
+
+    protected function getClubService(): ClubService
+    {
+        return $this->clubService ??= app(ClubService::class);
+    }
+
+    protected function getPersonService(): PersonService
+    {
+        return $this->personService ??= app(PersonService::class);
+    }
+
+    protected function getMessageService(): MessageService
+    {
+        return $this->messageService ??= app(MessageService::class);
     }
 
     public function createRole(array $data)
@@ -76,7 +91,7 @@ class RoleService
         $userRoleId = 0;
 
         if ($teamId && !$clubId) {
-            $team = $this->teamService->findOne(['id' => $teamId]);
+            $team = $this->getTeamService()->findOne(['id' => $teamId]);
             $clubId = $team->club_id;
         }
 
@@ -144,19 +159,19 @@ class RoleService
         }
 
         $role = $this->roleRepository->find($roleId);
-        $user = $this->userService->findOne(['id' => $authUser->id]);
+        $user = $this->getUserService()->findOne(['id' => $authUser->id]);
 
         $assignTarget = 'the club';
         if ($teamId) {
-            $team = $this->teamService->findOne(['id' => $teamId]);
+            $team = $this->getTeamService()->findOne(['id' => $teamId]);
             $assignTarget = $team->tournament_name;
         } elseif ($clubId) {
-            $club = $this->clubService->findOne(['id' => $clubId]);
+            $club = $this->getClubService()->findOne(['id' => $clubId]);
             $assignTarget = $club->name;
         }
 
         if ($approvedBy) {
-            $this->messageService->create([
+            $this->getMessageService()->create([
                 'type_id' => 1,
                 'to_id' => $userId,
                 'user_id' => $authUser->id === $userId ? 1473 : $authUser->id,
@@ -170,7 +185,7 @@ class RoleService
                 ->get();
 
             foreach ($coaches as $coach) {
-                $this->messageService->create([
+                $this->getMessageService()->create([
                     'type_id' => 1,
                     'to_id' => $coach->user_id,
                     'user_id' => 1473,
@@ -179,7 +194,7 @@ class RoleService
             }
         }
 
-        $this->personService->syncUserWithPerson($userId, $seasonSportId);
+        $this->getPersonService()->syncUserWithPerson($userId, $seasonSportId);
     }
 
     public function detachUserRole(User $authUser, $userId, array $userRoleIds)
@@ -191,10 +206,10 @@ class RoleService
         foreach ($userRoles as $userRole) {
             $target = '';
             if ($userRole->team_id) {
-                $team = $this->teamService->findOne(['id' => $userRole->team_id]);
+                $team = $this->getTeamService()->findOne(['id' => $userRole->team_id]);
                 $target = $team->local_name;
             } elseif ($userRole->club_id) {
-                $club = $this->clubService->findOne(['id' => $userRole->club_id]);
+                $club = $this->getClubService()->findOne(['id' => $userRole->club_id]);
                 $target = $club->name;
             }
 
@@ -214,7 +229,7 @@ class RoleService
 
             if ($target) {
                 $role = $this->roleRepository->find($userRole->role_id);
-                $this->messageService->create([
+                $this->getMessageService()->create([
                     'type_id' => 1,
                     'to_id' => $userRole->user_id,
                     'user_id' => $authUser->id === $userId ? 1473 : $authUser->id,
@@ -228,7 +243,7 @@ class RoleService
             ->update(['user_role_approved_by_user_id' => -1]);
 
         if (count($userRoles) > 0) {
-            $this->personService->syncUserWithPerson($userId, $userRoles[0]->season_sport_id);
+            $this->getPersonService()->syncUserWithPerson($userId, $userRoles[0]->season_sport_id);
         }
 
         return true;
@@ -243,16 +258,16 @@ class RoleService
         foreach ($userRoles as $userRole) {
             $target = '';
             if ($userRole->team_id) {
-                $team = $this->teamService->findOne(['id' => $userRole->team_id]);
+                $team = $this->getTeamService()->findOne(['id' => $userRole->team_id]);
                 $target = $team->local_name;
             } elseif ($userRole->club_id) {
-                $club = $this->clubService->findOne(['id' => $userRole->club_id]);
+                $club = $this->getClubService()->findOne(['id' => $userRole->club_id]);
                 $target = $club->name;
             }
 
             if ($target) {
                 $role = $this->roleRepository->find($userRole->role_id);
-                $this->messageService->create([
+                $this->getMessageService()->create([
                     'type_id' => 1,
                     'to_id' => $userRole->user_id,
                     'user_id' => $authUser->id === $userId ? 1473 : $authUser->id,
@@ -266,7 +281,7 @@ class RoleService
             ->update(['user_role_approved_by_user_id' => 1]);
 
         if (count($userRoles) > 0) {
-            $this->personService->syncUserWithPerson($userId, $userRoles[0]->season_sport_id);
+            $this->getPersonService()->syncUserWithPerson($userId, $userRoles[0]->season_sport_id);
         }
 
         return true;

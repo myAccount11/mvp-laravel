@@ -18,8 +18,20 @@ class LeagueService
     {
         $query = $this->leagueRepository->query();
 
-        if (isset($conditions['where'])) {
-            $query->where($conditions['where']);
+        if (isset($conditions['where']) && is_array($conditions['where'])) {
+            foreach ($conditions['where'] as $whereCondition) {
+                if (is_callable($whereCondition)) {
+                    // Handle closures
+                    $query->where($whereCondition);
+                } elseif (is_array($whereCondition)) {
+                    // Handle array conditions like ['column', 'operator', 'value']
+                    if (count($whereCondition) === 3) {
+                        $query->where($whereCondition[0], $whereCondition[1], $whereCondition[2]);
+                    } elseif (count($whereCondition) === 2) {
+                        $query->where($whereCondition[0], $whereCondition[1]);
+                    }
+                }
+            }
         }
 
         if (isset($conditions['include'])) {

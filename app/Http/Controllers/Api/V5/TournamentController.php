@@ -8,10 +8,6 @@ use App\Http\Requests\V5\UpdateTournamentRequest;
 use App\Services\V5\TournamentService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
-use App\Models\V5\Region;
-use App\Models\V5\Pool;
-use App\Models\V5\Round;
-use App\Models\V5\Team;
 
 class TournamentController extends Controller
 {
@@ -25,16 +21,18 @@ class TournamentController extends Controller
     public function create(CreateTournamentRequest $request): JsonResponse
     {
         $tournament = $this->tournamentService->create($request->validated());
+        $tournament->load(['region']);
         return response()->json($tournament, 201);
     }
 
     public function getAll(Request $request): JsonResponse
     {
-        $orderBy = $request->query('orderBy', 'id');
-        $orderDirection = $request->query('orderDirection', 'ASC');
-        $page = $request->query('page', 1);
-        $limit = $request->query('limit', 20);
-        $searchTerm = $request->query('searchTerm');
+        $orderBy = $request->query('order_by', 'id');
+        $orderDirection = $request->query('order_direction', 'ASC');
+        $page = (int)$request->query('page', 1);
+        $limit = (int)$request->query('limit', 20);
+        $searchTerm = $request->query('search_term');
+        $tournamentGroupId = $request->query('tournament_group_id');
 
         $conditions = [
             'orderBy' => $orderBy,
@@ -48,8 +46,16 @@ class TournamentController extends Controller
             $conditions['searchTerm'] = $searchTerm;
         }
 
+        if ($tournamentGroupId) {
+            $conditions['where'] = [['tournament_group_id', '=', (int)$tournamentGroupId]];
+        }
+
         $result = $this->tournamentService->findAndCountAll($conditions);
-        return response()->json($result);
+
+        return response()->json([
+            'rows' => $result['rows'],
+            'count' => $result['count']
+        ]);
     }
 
     public function destroy(int $id): JsonResponse
@@ -87,7 +93,15 @@ class TournamentController extends Controller
         if (!$updated) {
             return response()->json(['message' => 'Tournament not found or no changes made'], 404);
         }
-        return response()->json(['message' => 'Tournament updated successfully']);
+
+        $tournament = $this->tournamentService->findOne(['id' => $id]);
+        $tournament->load(['region', 'pools' => function ($q) {
+            $q->orderBy('id', 'ASC');
+        }, 'rounds' => function ($q) {
+            $q->orderBy('id', 'ASC');
+        }, 'teams']);
+
+        return response()->json($tournament);
     }
 
     public function getPossibleTeamsForTournament(int $id): JsonResponse

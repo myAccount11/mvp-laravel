@@ -14,8 +14,8 @@ class UpdateRoundRequest extends FormRequest
     public function rules(): array
     {
         return [
-            '*.id' => 'required|integer|exists:rounds,id',
-            '*.tournament_id' => 'sometimes|integer|exists:tournaments,id',
+            '*.id' => 'required|integer',
+            '*.tournament_id' => 'sometimes|integer',
             '*.number' => 'sometimes|integer',
             '*.from_date' => 'nullable|date',
             '*.to_date' => 'nullable|date',

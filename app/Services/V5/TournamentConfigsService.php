@@ -21,7 +21,29 @@ class TournamentConfigsService
 
     public function findAll(array $condition = []): \Illuminate\Database\Eloquent\Collection
     {
-        return $this->tournamentConfigRepository->findBy($condition);
+        // Normalize camelCase query parameters to snake_case for database columns
+        $normalized = $this->normalizeQueryParams($condition);
+        // findBy expects a flat array, not nested 'where'
+        return $this->tournamentConfigRepository->findBy($normalized);
+    }
+
+    /**
+     * Normalize camelCase query parameters to snake_case
+     * This is only for query parameters, not request body
+     */
+    protected function normalizeQueryParams(array $params): array
+    {
+        $normalized = [];
+        $fieldMap = [
+            'seasonSportId' => 'season_sport_id',
+        ];
+
+        foreach ($params as $key => $value) {
+            $snakeKey = $fieldMap[$key] ?? $key;
+            $normalized[$snakeKey] = $value;
+        }
+
+        return $normalized;
     }
 
     public function findAndCountAll(array $condition): array

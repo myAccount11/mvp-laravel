@@ -16,7 +16,7 @@ class CreateCoachByNameEmailRequest extends FormRequest
         return [
             'name' => 'required|string',
             'email' => 'required|email',
-            'season_sport_id' => 'required|integer|exists:season_sport,id',
+            'season_sport_id' => 'required|integer|exists:season_sports,id',
         ];
     }
 }

@@ -17,7 +17,7 @@ class PersonService
 {
     protected PersonRepository $personRepository;
     protected UserService $userService;
-    protected CoachService $coachService;
+    protected ?CoachService $coachService = null;
     protected PlayerService $playerService;
     protected SeasonService $seasonService;
     protected SystemService $systemService;
@@ -26,7 +26,6 @@ class PersonService
     public function __construct(
         PersonRepository $personRepository,
         UserService $userService,
-        CoachService $coachService,
         PlayerService $playerService,
         SeasonService $seasonService,
         SystemService $systemService,
@@ -34,11 +33,15 @@ class PersonService
     ) {
         $this->personRepository = $personRepository;
         $this->userService = $userService;
-        $this->coachService = $coachService;
         $this->playerService = $playerService;
         $this->seasonService = $seasonService;
         $this->systemService = $systemService;
         $this->playerLicenseService = $playerLicenseService;
+    }
+
+    protected function getCoachService(): CoachService
+    {
+        return $this->coachService ??= app(CoachService::class);
     }
 
     public function findAll(string $orderBy = 'id', string $orderDirection = 'asc'): \Illuminate\Database\Eloquent\Collection
@@ -125,7 +128,7 @@ class PersonService
         }
 
         // Coach part
-        $existingCoach = $this->coachService->findOne(['person_id' => $personId]);
+        $existingCoach = $this->getCoachService()->findOne(['person_id' => $personId]);
 
         if (!$existingCoach && ($coachAssistant || $coachTeamManager || $coachHead || $isCoach)) {
             $lastLicense = $this->systemService->findOne(['season_sport_id' => $seasonSportId]);
@@ -136,7 +139,7 @@ class PersonService
                     'next_coach_license' => $nextLicense,
                 ]);
 
-                $this->coachService->create([
+                $this->getCoachService()->create([
                     'person_id' => $personId,
                     'license' => $nextLicense,
                     'start' => $formattedDate,

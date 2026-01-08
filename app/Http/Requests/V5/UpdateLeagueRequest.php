@@ -19,7 +19,7 @@ class UpdateLeagueRequest extends FormRequest
             'end_date' => 'sometimes|date',
             'club_id' => 'nullable|integer|exists:clubs,id',
             'deleted' => 'nullable|boolean',
-            'season_sport_id' => 'sometimes|integer|exists:season_sport,id',
+            'season_sport_id' => 'sometimes|integer|exists:season_sports,id',
             'is_active' => 'sometimes|boolean',
             'user_id' => 'nullable|integer|exists:users,id',
             'organizer_id' => 'nullable|integer|exists:organizers,id',

@@ -13,5 +13,10 @@ class TournamentRegistrationType extends Model
     protected $fillable = [
         'name',
     ];
+
+    public function tournamentGroups()
+    {
+        return $this->hasMany(TournamentGroup::class, 'tournament_registration_type_id');
+    }
 }
 

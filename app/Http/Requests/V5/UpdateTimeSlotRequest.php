@@ -20,7 +20,7 @@ class UpdateTimeSlotRequest extends FormRequest
             'expiration' => 'nullable|date',
             'court_id' => 'sometimes|integer|exists:courts,id',
             'club_id' => 'nullable|integer|exists:clubs,id',
-            'season_sport_id' => 'sometimes|integer|exists:season_sport,id',
+            'season_sport_id' => 'sometimes|integer|exists:season_sports,id',
             'is_deleted' => 'nullable|boolean',
         ];
     }
