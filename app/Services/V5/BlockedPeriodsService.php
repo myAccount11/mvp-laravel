@@ -17,7 +17,39 @@ class BlockedPeriodsService
 
     public function findOne(array $condition): ?BlockedPeriod
     {
-        return $this->blockedPeriodRepository->findOneBy($condition);
+        $query = $this->blockedPeriodRepository->query();
+
+        // Handle where conditions
+        if (isset($condition['where'])) {
+            $whereConditions = $condition['where'];
+            if (is_array($whereConditions)) {
+                foreach ($whereConditions as $key => $value) {
+                    if (is_callable($value)) {
+                        // Handle closure functions
+                        $query->where($value);
+                    } elseif (is_array($value)) {
+                        // Handle array conditions like ['column', 'operator', 'value']
+                        if (count($value) === 3) {
+                            $query->where($value[0], $value[1], $value[2]);
+                        } elseif (count($value) === 2) {
+                            $query->where($value[0], $value[1]);
+                        }
+                    } else {
+                        // Handle simple key-value pairs
+                        $query->where($key, $value);
+                    }
+                }
+            } elseif (is_callable($whereConditions)) {
+                $query->where($whereConditions);
+            }
+        }
+
+        // Handle include relations
+        if (isset($condition['include'])) {
+            $query->with($condition['include']);
+        }
+
+        return $query->first();
     }
 
     public function findAll(array $condition = []): \Illuminate\Database\Eloquent\Collection

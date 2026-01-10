@@ -66,5 +66,13 @@ class Club extends Model
     {
         return $this->hasMany(ClubVenue::class, 'club_id');
     }
+
+    public function managers()
+    {
+        return $this->belongsToMany(User::class, 'user_roles', 'club_id', 'user_id')
+            ->wherePivot('role_id', 1)
+            ->wherePivot('user_role_approved_by_user_id', '>', 0)
+            ->withPivot('role_id', 'team_id', 'season_sport_id', 'user_role_approved_by_user_id', 'user_role_spec');
+    }
 }
 

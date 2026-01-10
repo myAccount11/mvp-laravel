@@ -68,7 +68,8 @@ class Tournament extends Model
 
     public function teams()
     {
-        return $this->belongsToMany(Team::class, 'team_tournaments', 'tournament_id', 'team_id');
+        return $this->belongsToMany(Team::class, 'team_tournaments', 'tournament_id', 'team_id')
+            ->withPivot('pool_id', 'pool_key', 'start_points');
     }
 
     public function teamTournaments()

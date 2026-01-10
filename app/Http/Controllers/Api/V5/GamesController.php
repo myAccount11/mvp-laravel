@@ -3,10 +3,12 @@
 namespace App\Http\Controllers\Api\V5;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\V5\CheckGameRequest;
 use App\Services\V5\GameService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 
 class GamesController extends Controller
 {
@@ -56,9 +58,24 @@ class GamesController extends Controller
 
     public function createAllTournamentGames(Request $request, int $tournamentId): JsonResponse
     {
-        $seasonSportId = $request->query('seasonSportId');
-        $result = $this->gameService->createAllTournamentGames($tournamentId, $seasonSportId);
-        return response()->json($result);
+        try {
+            DB::beginTransaction();
+            $seasonSportId = $request->query('seasonSportId');
+            $result = $this->gameService->createAllTournamentGames($tournamentId, $seasonSportId);
+            DB::commit();
+            return response()->json($result);
+        } catch (\Exception $e) {
+            DB::rollBack();
+            // Check if it's a team count validation error
+            if (strpos($e->getMessage(), 'Team Count Error') !== false) {
+                return response()->json([
+                    'message' => $e->getMessage(),
+                    'error' => 'Validation failed'
+                ], 422);
+            }
+            // Re-throw other exceptions
+            throw $e;
+        }
     }
 
     public function deleteTournamentGames(int $tournamentId): JsonResponse
@@ -96,13 +113,14 @@ class GamesController extends Controller
                 'homeTeam.club',
                 'guestTeam',
                 'court.venue',
-                'suggestions' => function ($query) {
+                'suggestion' => function ($query) {
                     $query->whereNull('accepted_by')
+                        ->whereNull('rejected_by')
                         ->with(['requestedByUser', 'court.venue']);
                 },
                 'messages' => function ($query) {
                     $query->whereIn('type_id', [5, 7, 12, 13])
-                        ->with(['user.userRoles', 'attachments']);
+                        ->with(['writer.userRoles', 'attachments']);
                 },
                 'gameNotes',
                 'club',
@@ -129,16 +147,16 @@ class GamesController extends Controller
             });
 
             $homeTeamRole = $clubRoles->first(function ($role) use ($game) {
-                return $role->userRoles->club_id === $game->homeTeam->club_id ||
-                    $role->userRoles->team_id === $game->homeTeam->id;
+                return ($role->pivot->club_id ?? null) === $game->homeTeam->club_id ||
+                    ($role->pivot->team_id ?? null) === $game->homeTeam->id;
             });
 
             if ($homeTeamRole) {
                 $gameData['conflict'] = $game->conflict()->where('ignore_home', false)->first();
             } else {
                 $guestTeamRole = $clubRoles->first(function ($role) use ($game) {
-                    return $role->userRoles->club_id === $game->guestTeam->club_id ||
-                        $role->userRoles->team_id === $game->guestTeam->id;
+                    return ($role->pivot->club_id ?? null) === $game->guestTeam->club_id ||
+                        ($role->pivot->team_id ?? null) === $game->guestTeam->id;
                 });
 
                 if ($guestTeamRole) {
@@ -163,9 +181,9 @@ class GamesController extends Controller
         return response()->json($result);
     }
 
-    public function checkGame(int $id, Request $request): JsonResponse
+    public function checkGame(int $id, CheckGameRequest $request): JsonResponse
     {
-        $errors = $this->gameService->checkGame($id, $request->all());
+        $errors = $this->gameService->checkGame($id, $request->validated());
         return response()->json($errors);
     }
 

@@ -6,16 +6,19 @@ use App\Models\V5\Venue;
 use App\Repositories\V5\VenueRepository;
 use App\Services\V5\ClubService;
 use App\Services\V5\CourtService;
+use App\Services\V5\TeamService;
 use App\Models\V5\VenueSeasonSport;
 use App\Models\V5\ClubVenue;
 use App\Models\V5\Court;
 use App\Models\V5\Club;
+use App\Models\V5\Team;
 
 class VenueService
 {
     protected VenueRepository $venueRepository;
     protected ClubService $clubService;
     protected CourtService $courtService;
+    protected ?TeamService $teamService = null;
 
     public function __construct(
         VenueRepository $venueRepository,
@@ -27,8 +30,18 @@ class VenueService
         $this->courtService = $courtService;
     }
 
+    protected function getTeamService(): TeamService
+    {
+        return $this->teamService ??= app(TeamService::class);
+    }
+
     public function createVenue(array $dto, int $seasonSportId): Venue
     {
+        // Set default is_active to true if not provided
+        if (!isset($dto['is_active'])) {
+            $dto['is_active'] = true;
+        }
+
         $venue = $this->venueRepository->create($dto);
 
         VenueSeasonSport::create([
@@ -47,11 +60,16 @@ class VenueService
         $limit = $conditions['limit'] ?? 20;
         $searchTerm = $conditions['searchTerm'] ?? null;
         $seasonSportId = $conditions['seasonSportId'] ?? null;
+        $isActive = $conditions['is_active'] ?? null;
 
         $query = $this->venueRepository->query();
 
         if ($searchTerm) {
             $query->where('name', 'ILIKE', "%{$searchTerm}%");
+        }
+
+        if ($isActive !== null) {
+            $query->where('is_active', (bool) $isActive);
         }
 
         $query->with([
@@ -88,8 +106,25 @@ class VenueService
     {
         $query = $this->venueRepository->query();
 
+        // Handle season_sport_id filtering via venue_season_sport relationship
+        if (isset($conditions['season_sport_id']) && $conditions['season_sport_id'] !== null) {
+            $query->whereHas('venueSeasonSports', function ($q) use ($conditions) {
+                $q->where('season_sport_id', $conditions['season_sport_id']);
+            });
+        }
+
         if (isset($conditions['include'])) {
             $query->with($conditions['include']);
+        }
+
+        if (isset($conditions['where'])) {
+            foreach ($conditions['where'] as $key => $value) {
+                $query->where($key, $value);
+            }
+        }
+
+        if (isset($conditions['is_active'])) {
+            $query->where('is_active', (bool) $conditions['is_active']);
         }
 
         if (isset($conditions['order'])) {
@@ -103,9 +138,9 @@ class VenueService
         return $query->get();
     }
 
-    public function findOne(array $condition): ?Venue
+    public function findOne(array $condition, array $relations = []): ?Venue
     {
-        return $this->venueRepository->findOneBy($condition);
+        return $this->venueRepository->findOneBy($condition, relations: $relations);
     }
 
     public function updateVenue(int $id, array $updateVenueDto): array
@@ -118,14 +153,14 @@ class VenueService
             }
 
             $deletedLicenseNumbers = $updateVenueDto['deleted_license_numbers'] ?? [];
-            $clubLicenseNumbers = $updateVenueDto['club_license_numbers'] ?? [];
+            $clubTeamNames = $updateVenueDto['club_team_names'] ?? [];
             $courtsCreate = $updateVenueDto['courts_create'] ?? [];
             $courtsUpdate = $updateVenueDto['courts_update'] ?? [];
             $deleteCourts = $updateVenueDto['delete_courts'] ?? [];
 
             $theOthers = collect($updateVenueDto)->except([
                 'deleted_license_numbers',
-                'club_license_numbers',
+                'club_team_names',
                 'courts_create',
                 'courts_update',
                 'delete_courts',
@@ -133,13 +168,23 @@ class VenueService
 
             $this->venueRepository->update($id, $theOthers);
 
-            // Add club associations
-            if (!empty($clubLicenseNumbers)) {
-                foreach ($clubLicenseNumbers as $clubLicense) {
-                    $club = $this->clubService->findOne(['license' => $clubLicense]);
+            // Add club associations by team names
+            if (!empty($clubTeamNames)) {
+                foreach ($clubTeamNames as $teamName) {
+                    // Find team by local_name or tournament_name
+                    $team = Team::where(function($query) use ($teamName) {
+                        $query->where('local_name', 'ilike', "%{$teamName}%")
+                              ->orWhere('tournament_name', 'ilike', "%{$teamName}%");
+                    })->where('deleted', false)->first();
+
+                    if (!$team || !$team->club_id) {
+                        return ['message' => "Team '{$teamName}' not found or has no associated club"];
+                    }
+
+                    $club = $this->clubService->findOne(['id' => $team->club_id]);
 
                     if (!$club) {
-                        return ['message' => 'Club not found'];
+                        return ['message' => "Club not found for team '{$teamName}'"];
                     }
 
                     $existingAssociation = ClubVenue::where('club_id', $club->id)
@@ -203,7 +248,7 @@ class VenueService
                         'venue_id' => $courtForDel['venue_id'],
                     ]);
                     if ($court) {
-                        $this->courtService->delete($court->id);
+                        $court->delete();
                     }
                 }
             }

@@ -140,6 +140,11 @@ class Game extends Model
                     ->whereNull('rejected_by');
     }
 
+    public function suggestions()
+    {
+        return $this->hasMany(Suggestion::class, 'game_id');
+    }
+
     public function gamePlans()
     {
         return $this->hasMany(GamePlan::class, 'game_id');
@@ -156,6 +161,11 @@ class Game extends Model
     }
 
     public function notes()
+    {
+        return $this->hasMany(GameNote::class, 'game_id');
+    }
+
+    public function gameNotes()
     {
         return $this->hasMany(GameNote::class, 'game_id');
     }

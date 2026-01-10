@@ -16,7 +16,41 @@ class SeasonSportService
 
     public function findOne(array $condition): ?SeasonSport
     {
-        return $this->seasonSportRepository->findOneBy($condition);
+        $query = $this->seasonSportRepository->query();
+
+        // Handle where conditions
+        if (isset($condition['where'])) {
+            $whereConditions = $condition['where'];
+            if (is_array($whereConditions)) {
+                foreach ($whereConditions as $key => $value) {
+                    if (is_callable($value)) {
+                        $query->where($value);
+                    } elseif (is_array($value)) {
+                        if (count($value) === 3) {
+                            $query->where($value[0], $value[1], $value[2]);
+                        } elseif (count($value) === 2) {
+                            $query->where($value[0], $value[1]);
+                        }
+                    } else {
+                        $query->where($key, $value);
+                    }
+                }
+            }
+        } else {
+            // Backward compatibility
+            foreach ($condition as $key => $value) {
+                if ($key !== 'include') {
+                    $query->where($key, $value);
+                }
+            }
+        }
+
+        // Handle include relations
+        if (isset($condition['include'])) {
+            $query->with($condition['include']);
+        }
+
+        return $query->first();
     }
 }
 

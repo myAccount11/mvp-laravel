@@ -42,7 +42,66 @@ class ReservationService
 
     public function findOne(array $condition): ?Reservation
     {
-        return $this->reservationRepository->findOneBy($condition);
+        $query = $this->reservationRepository->query();
+
+        // Handle where conditions
+        if (isset($condition['where'])) {
+            $whereConditions = $condition['where'];
+            if (is_array($whereConditions)) {
+                foreach ($whereConditions as $key => $value) {
+                    if (is_callable($value)) {
+                        // Handle closure functions
+                        $query->where($value);
+                    } elseif (is_array($value)) {
+                        // Handle array conditions like ['column', 'operator', 'value']
+                        if (count($value) === 3) {
+                            $query->where($value[0], $value[1], $value[2]);
+                        } elseif (count($value) === 2) {
+                            $query->where($value[0], $value[1]);
+                        }
+                    } else {
+                        // Handle simple key-value pairs
+                        $query->where($key, $value);
+                    }
+                }
+            }
+        }
+
+        // Handle include relations (supports nested where clauses with whereHas)
+        if (isset($condition['include'])) {
+            $includes = [];
+            $whereHasConditions = [];
+            
+            foreach ($condition['include'] as $key => $value) {
+                if (is_string($key)) {
+                    // Nested relation with constraints: 'timeSlot' => function($q) {...}
+                    if (is_callable($value)) {
+                        // Add whereHas condition first, then include relation for eager loading
+                        $whereHasConditions[$key] = $value;
+                        $includes[$key] = $value; // Also include for eager loading
+                    } else {
+                        $includes[$key] = $value;
+                    }
+                } else {
+                    // Simple relation name (numeric key)
+                    if (is_string($value)) {
+                        $includes[] = $value;
+                    }
+                }
+            }
+            
+            // Apply whereHas conditions first (they filter the main query)
+            foreach ($whereHasConditions as $relation => $callback) {
+                $query->whereHas($relation, $callback);
+            }
+            
+            // Then eager load the relations
+            if (!empty($includes)) {
+                $query->with($includes);
+            }
+        }
+
+        return $query->first();
     }
 
     public function create(array $data): Reservation

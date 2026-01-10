@@ -28,10 +28,10 @@ class ReservationController extends Controller
 
     public function getAll(): JsonResponse
     {
-        $orderBy = request('orderBy', 'id');
-        $orderDirection = request('orderDirection', 'asc');
+        $orderBy = request('order_by', 'id');
+        $orderDirection = request('order_direction', 'asc');
         $reservations = $this->reservationService->findAll([
-            'where' => request()->except(['orderBy', 'orderDirection']),
+            'where' => request()->except(['order_by', 'order_direction']),
             'order' => [[$orderBy, $orderDirection]],
         ]);
         return response()->json($reservations);

@@ -13,7 +13,7 @@ class Court extends Model
 
     protected $fillable = [
         'name',
-        'in_active',
+        'is_active',
         'venue_id',
         'length',
         'width',
@@ -36,7 +36,7 @@ class Court extends Model
     ];
 
     protected $casts = [
-        'in_active' => 'boolean',
+        'is_active' => 'boolean',
         'venue_id' => 'integer',
         'length' => 'integer',
         'width' => 'integer',

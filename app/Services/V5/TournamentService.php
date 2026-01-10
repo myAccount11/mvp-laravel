@@ -34,7 +34,23 @@ class TournamentService
 
     public function findOne(array $condition): ?Tournament
     {
-        return $this->tournamentRepository->findOneBy($condition);
+        // Extract where conditions and include relations
+        $whereConditions = $condition['where'] ?? [];
+        $includeRelations = $condition['include'] ?? [];
+
+        // If whereConditions is empty but condition has direct keys (for backward compatibility)
+        if (empty($whereConditions) && !isset($condition['where']) && !isset($condition['include'])) {
+            $whereConditions = $condition;
+        }
+
+        $tournament = $this->tournamentRepository->findOneBy($whereConditions, ['*'], $includeRelations);
+        
+        // Load relations if tournament found and relations were requested
+        if ($tournament && !empty($includeRelations)) {
+            $tournament->load($includeRelations);
+        }
+        
+        return $tournament;
     }
 
     public function create(array $data): Tournament

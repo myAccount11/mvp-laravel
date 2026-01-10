@@ -101,10 +101,17 @@ abstract class BaseRepository implements RepositoryInterface
 
         foreach ($conditions as $key => $value) {
             if (is_array($value)) {
-                if (count($value) === 3) {
+                // Handle array format: ['column', 'operator', 'value'] or ['column', 'value']
+                if (count($value) === 3 && isset($value[0]) && isset($value[1]) && isset($value[2])) {
                     $query->where($value[0], $value[1], $value[2]);
-                } elseif (count($value) === 2) {
+                } elseif (count($value) === 2 && isset($value[0]) && isset($value[1])) {
                     $query->where($value[0], $value[1]);
+                } elseif (count($value) === 0) {
+                    // Skip empty arrays
+                    continue;
+                } else {
+                    // If it's an array but not in expected format, treat as value
+                    $query->where($key, $value);
                 }
             } else {
                 $query->where($key, $value);

@@ -16,10 +16,19 @@ class Venue extends Model
         'address_line1',
         'address_line2',
         'postal_code',
-        'city',
+        'postal_city',
         'country',
         'phone_number',
+        'web_address',
+        'is_active',
+        'lat_lng',
+        'place_id',
+        'cal_key',
         'email',
+    ];
+
+    protected $casts = [
+        'is_active' => 'boolean',
     ];
 
     public function courts()
@@ -30,6 +39,16 @@ class Venue extends Model
     public function clubs()
     {
         return $this->belongsToMany(Club::class, 'club_venues', 'venue_id', 'club_id');
+    }
+
+    public function clubVenues()
+    {
+        return $this->hasMany(ClubVenue::class, 'venue_id');
+    }
+
+    public function venueSeasonSports()
+    {
+        return $this->hasMany(VenueSeasonSport::class, 'venue_id');
     }
 }
 

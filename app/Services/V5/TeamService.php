@@ -195,6 +195,22 @@ class TeamService
 
     public function attachTournament($id, $tournamentId, array $data = [])
     {
+        // Check if team is already attached to this tournament
+        $existing = DB::table('team_tournaments')
+            ->where('team_id', $id)
+            ->where('tournament_id', $tournamentId)
+            ->where('is_deleted', false)
+            ->first();
+
+        if ($existing) {
+            // Update existing record with new pool_id and other data
+            DB::table('team_tournaments')
+                ->where('id', $existing->id)
+                ->update($data);
+            return true;
+        }
+
+        // Create new record if not already attached
         return DB::table('team_tournaments')->insert(array_merge([
             'team_id' => $id,
             'tournament_id' => $tournamentId,

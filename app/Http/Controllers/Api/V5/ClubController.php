@@ -43,7 +43,7 @@ class ClubController extends Controller
 
     public function show($id): JsonResponse
     {
-        $club = $this->clubService->findOne(['id' => $id]);
+        $club = $this->clubService->findOne(['id' => $id], ['managers']);
         if (!$club) {
             return response()->json(['error' => 'Club not found'], 404);
         }

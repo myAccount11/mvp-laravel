@@ -15,7 +15,7 @@ class RecreateRoundRequest extends FormRequest
     {
         return [
             '*.number' => 'required|integer',
-            '*.tournament_id' => 'required|integer',
+            '*.tournament_id' => 'nullable|integer',
             '*.from_date' => 'required|date',
             '*.to_date' => 'required|date',
             '*.week' => 'nullable|integer',

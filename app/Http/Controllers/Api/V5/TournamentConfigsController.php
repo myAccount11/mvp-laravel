@@ -46,9 +46,7 @@ class TournamentConfigsController extends Controller
 
     public function getById(int $id): JsonResponse
     {
-        $tournamentConfig = $this->tournamentConfigsService->findOne([
-            'where' => ['id' => $id],
-        ]);
+        $tournamentConfig = $this->tournamentConfigsService->findOne(['id' => $id]);
 
         if (!$tournamentConfig) {
             return response()->json(['message' => 'Tournament config not found'], 404);

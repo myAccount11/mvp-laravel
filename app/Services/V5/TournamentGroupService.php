@@ -19,12 +19,12 @@ class TournamentGroupService
         // Extract where conditions and include relations
         $whereConditions = $condition['where'] ?? [];
         $includeRelations = $condition['include'] ?? [];
-        
+
         // If whereConditions is empty but condition has direct keys (for backward compatibility)
         if (empty($whereConditions) && !isset($condition['where']) && !isset($condition['include'])) {
             $whereConditions = $condition;
         }
-        
+
         return $this->tournamentGroupRepository->findOneBy($whereConditions, ['*'], $includeRelations);
     }
 
@@ -137,7 +137,7 @@ class TournamentGroupService
 
         // Get all teams from the league's clubs or all teams if no league
         $query = \App\Models\V5\Team::query();
-        
+
         if ($tournamentGroup->league_id) {
             $league = \App\Models\V5\League::find($tournamentGroup->league_id);
             if ($league && $league->club_id) {

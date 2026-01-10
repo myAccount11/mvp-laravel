@@ -29,11 +29,19 @@ class CourtController extends Controller
 
     public function getCourtsForFilter(): JsonResponse
     {
-        $seasonSportId = request('seasonSportId');
+        $seasonSportId = request('seasonSportId') ?? request('season_sport_id');
+        
+        if (!$seasonSportId) {
+            return response()->json(['error' => 'seasonSportId is required'], 400);
+        }
         
         $venueSeasonSports = VenueSeasonSport::where('season_sport_id', $seasonSportId)->get();
         
         $venueIds = $venueSeasonSports->pluck('venue_id')->toArray();
+        
+        if (empty($venueIds)) {
+            return response()->json([]);
+        }
         
         $courts = Court::whereIn('venue_id', $venueIds)
             ->with(['venue' => function($q) {

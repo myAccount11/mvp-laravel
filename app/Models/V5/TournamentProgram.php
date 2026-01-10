@@ -18,5 +18,10 @@ class TournamentProgram extends Model
     protected $casts = [
         'season_sport_id' => 'integer',
     ];
+
+    public function items()
+    {
+        return $this->hasMany(TournamentProgramItem::class, 'tournament_program_id');
+    }
 }
 

@@ -42,7 +42,7 @@ class PoolService
             unset($poolData['id']); // Remove id if present
             $pools[] = $this->poolRepository->create($poolData);
         }
-        return collect($pools);
+        return new \Illuminate\Database\Eloquent\Collection($pools);
     }
 
     public function createOrUpdate(int $tournamentId, array $data): \Illuminate\Database\Eloquent\Collection

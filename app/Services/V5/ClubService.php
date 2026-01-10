@@ -46,9 +46,9 @@ class ClubService
         return $query->get();
     }
 
-    public function findOne(array $conditions)
+    public function findOne(array $conditions, array $relations = [])
     {
-        return $this->clubRepository->findOneBy($conditions);
+        return $this->clubRepository->findOneBy($conditions, ['*'], $relations);
     }
 
     public function createClub(array $data, $seasonSportId)

@@ -11,6 +11,8 @@ class CourtUsage extends Model
 
     protected $table = 'court_usage';
 
+    public $timestamps = false;
+
     protected $fillable = [
         'court_usage_count',
         'court_requirement_id',

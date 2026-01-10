@@ -31,7 +31,13 @@ class GameDraftService
 
     public function createMany(array $data): array
     {
-        return $this->gameDraftRepository->query()->insert($data);
+        $inserted = $this->gameDraftRepository->query()->insert($data);
+        // insert() returns bool, but we need to return array
+        // Return empty array on success, or throw exception on failure
+        if ($inserted) {
+            return [];
+        }
+        throw new \Exception('Failed to insert game drafts');
     }
 
     public function deleteByCondition(array $condition): int

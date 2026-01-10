@@ -36,7 +36,25 @@ class CourtService
         $query = $this->courtRepository->query();
 
         if (isset($conditions['where'])) {
-            $query->where($conditions['where']);
+            if (is_callable($conditions['where'])) {
+                // Handle closure functions
+                $query->where($conditions['where']);
+            } elseif (is_array($conditions['where'])) {
+                // Handle array of conditions
+                foreach ($conditions['where'] as $key => $value) {
+                    if (is_array($value)) {
+                        if (count($value) === 3) {
+                            $query->where($value[0], $value[1], $value[2]);
+                        } elseif (count($value) === 2) {
+                            $query->where($value[0], $value[1]);
+                        }
+                    } else {
+                        $query->where($key, $value);
+                    }
+                }
+            } else {
+                $query->where($conditions['where']);
+            }
         }
 
         if (isset($conditions['include'])) {
@@ -99,6 +117,11 @@ class CourtService
 
     public function insertOrUpdateCourtUsage(int $courtId, ?int $usageCount, ?int $requirementId): void
     {
+        // Skip if requirementId is null or invalid
+        if (!$requirementId || $requirementId < 1 || $requirementId > 4) {
+            return;
+        }
+
         $existingUsage = $this->courtUsageRepository->findOneBy([
             'court_id' => $courtId,
             'court_requirement_id' => $requirementId,
@@ -107,15 +130,23 @@ class CourtService
         $count = $usageCount ?? 0;
 
         if ($existingUsage) {
-            $this->courtUsageRepository->update($existingUsage->id, [
-                'court_usage_count' => $count,
-            ]);
+            // Update existing usage, or delete if count is 0
+            if ($count > 0) {
+                $this->courtUsageRepository->update($existingUsage->id, [
+                    'court_usage_count' => $count,
+                ]);
+            } else {
+                $this->courtUsageRepository->delete($existingUsage->id);
+            }
         } else {
-            $this->courtUsageRepository->create([
-                'court_id' => $courtId,
-                'court_requirement_id' => $requirementId,
-                'court_usage_count' => $count,
-            ]);
+            // Only create if count is greater than 0
+            if ($count > 0) {
+                $this->courtUsageRepository->create([
+                    'court_id' => $courtId,
+                    'court_requirement_id' => $requirementId,
+                    'court_usage_count' => $count,
+                ]);
+            }
         }
     }
 

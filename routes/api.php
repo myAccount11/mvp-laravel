@@ -107,6 +107,7 @@ Route::middleware(['jwt.auth'])->group(function () {
 
         Route::prefix('courts')->group(function () {
             Route::get('/', [\App\Http\Controllers\Api\V5\CourtController::class, 'getAll']);
+            Route::get('/all', [\App\Http\Controllers\Api\V5\CourtController::class, 'getCourtsForFilter']);
             Route::get('/for-filter', [\App\Http\Controllers\Api\V5\CourtController::class, 'getCourtsForFilter']);
             Route::get('/for-clubs', [\App\Http\Controllers\Api\V5\CourtController::class, 'getCourtsForClubs']);
             Route::get('/{id}', [\App\Http\Controllers\Api\V5\CourtController::class, 'getById']);
@@ -341,6 +342,14 @@ Route::middleware(['jwt.auth'])->group(function () {
             Route::get('/{id}', [\App\Http\Controllers\Api\V5\TournamentProgramsController::class, 'getById']);
             Route::put('/{id}', [\App\Http\Controllers\Api\V5\TournamentProgramsController::class, 'update']);
             Route::delete('/{id}', [\App\Http\Controllers\Api\V5\TournamentProgramsController::class, 'destroy']);
+        });
+
+        Route::prefix('tournament-program-items')->group(function () {
+            Route::get('/', [\App\Http\Controllers\Api\V5\TournamentProgramItemsController::class, 'getAll']);
+            Route::post('/', [\App\Http\Controllers\Api\V5\TournamentProgramItemsController::class, 'create']);
+            Route::get('/{id}', [\App\Http\Controllers\Api\V5\TournamentProgramItemsController::class, 'getById']);
+            Route::put('/{id}', [\App\Http\Controllers\Api\V5\TournamentProgramItemsController::class, 'update']);
+            Route::delete('/{id}', [\App\Http\Controllers\Api\V5\TournamentProgramItemsController::class, 'destroy']);
         });
 
         Route::prefix('tournament-group')->group(function () {

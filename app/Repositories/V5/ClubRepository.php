@@ -56,7 +56,7 @@ class ClubRepository extends BaseRepository
         $offset = ($page - 1) * $limit;
 
         $count = $query->count();
-        $rows = $query->with(['clubSeasonSports', 'clubVenues'])
+        $rows = $query->with(['clubSeasonSports', 'clubVenues', 'managers'])
             ->offset($offset)
             ->limit($limit)
             ->get();

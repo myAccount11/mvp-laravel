@@ -4,6 +4,8 @@ namespace Database\Seeders;
 
 use App\Models\V5\User;
 use App\Models\V5\UserRole;
+use App\Models\V5\SeasonSport;
+use App\Models\V5\UserSeasonSport;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\Hash;
 
@@ -37,6 +39,27 @@ class SuperUserSeeder extends Seeder
                 'user_role_spec' => '',
             ]
         );
+
+        // Attach user to latest season sports (from the latest season)
+        $latestSeason = \App\Models\V5\Season::orderBy('id', 'desc')->first();
+        
+        if ($latestSeason) {
+            $latestSeasonSports = SeasonSport::where('season_id', $latestSeason->id)->get();
+            
+            foreach ($latestSeasonSports as $seasonSport) {
+                UserSeasonSport::updateOrCreate(
+                    [
+                        'user_id' => $user->id,
+                        'season_sport_id' => $seasonSport->id,
+                    ],
+                    [
+                        'user_id' => $user->id,
+                        'season_sport_id' => $seasonSport->id,
+                        'is_active' => true,
+                    ]
+                );
+            }
+        }
     }
 }
 

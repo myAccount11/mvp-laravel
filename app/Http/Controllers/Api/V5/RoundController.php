@@ -52,9 +52,16 @@ class RoundController extends Controller
         }
     }
 
-    public function getAll(): JsonResponse
+    public function getAll(Request $request): JsonResponse
     {
-        $rounds = $this->roundService->findAll();
+        $tournamentId = $request->query('tournament_id');
+        
+        if ($tournamentId) {
+            $rounds = $this->roundService->findAll(['where' => ['tournament_id' => $tournamentId]]);
+        } else {
+            $rounds = $this->roundService->findAll();
+        }
+        
         return response()->json($rounds);
     }
 
