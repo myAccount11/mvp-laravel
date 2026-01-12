@@ -42,7 +42,7 @@ class TournamentProgramItemsService
     public function deleteByCondition(array $condition): bool
     {
         $query = $this->tournamentProgramItemRepository->query();
-        
+
         if (isset($condition['where'])) {
             foreach ($condition['where'] as $key => $value) {
                 $query->where($key, $value);
@@ -52,7 +52,7 @@ class TournamentProgramItemsService
                 $query->where($key, $value);
             }
         }
-        
+
         return $query->delete() > 0;
     }
 }

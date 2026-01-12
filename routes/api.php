@@ -1,6 +1,5 @@
 <?php
 
-use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Api\V5\UserController;
@@ -29,9 +28,9 @@ Route::prefix('auth')->group(function () {
 });
 
 // Protected routes
-Route::middleware(['jwt.auth'])->group(function () {
+Route::middleware(['auth:sanctum'])->group(function () {
     Route::get('/auth/me', [AuthController::class, 'me']);
-    
+
     // V5 API routes
     Route::prefix('v5')->group(function () {
         Route::prefix('users')->group(function () {

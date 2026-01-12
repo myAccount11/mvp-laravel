@@ -30,8 +30,8 @@ class UserService
         $user = $this->userRepository->create($data);
 
         // Send create password email
-        $token = \Tymon\JWTAuth\Facades\JWTAuth::fromUser($user);
-        $this->mailService->sendMailCreatePassword($user->email, $user->name, $token);
+        $token = $user->createToken('create-password', ['create-password'], now()->addMinutes(30));
+        $this->mailService->sendMailCreatePassword($user->email, $user->name, $token->plainTextToken);
 
         return $user;
     }
@@ -54,10 +54,19 @@ class UserService
 
         $user = $this->userRepository->create($data);
 
-        $token = \Tymon\JWTAuth\Facades\JWTAuth::fromUser($user);
-        $this->mailService->sendMailCreatePassword($user->email, $user->name, $token);
+        $token = $user->createToken('create-password', ['create-password'], now()->addMinutes(30));
+        $this->mailService->sendMailCreatePassword($user->email, $user->name, $token->plainTextToken);
 
         return $user;
+    }
+
+    public function createGoogleUser(array $data)
+    {
+        $lastLicense = $this->userRepository->getLastLicense();
+        $data['license'] = $lastLicense + 1;
+        $data['email'] = strtolower($data['email']);
+
+        return $this->userRepository->create($data);
     }
 
     public function verifyUser($id)

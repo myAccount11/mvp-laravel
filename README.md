@@ -14,7 +14,7 @@ This is a Laravel 10 conversion of the NestJS MVP project. The project has been 
 ### Key Features Converted
 
 #### Authentication
-- JWT Authentication using `tymon/jwt-auth`
+- Laravel Sanctum API Token Authentication
 - Login, Registration, Google Sign-In
 - Password Reset and Change Password
 - Email Verification
@@ -31,7 +31,7 @@ This is a Laravel 10 conversion of the NestJS MVP project. The project has been 
 ### Configuration
 
 1. **Database**: PostgreSQL (configured in `config/database.php`)
-2. **Authentication**: JWT (configured in `config/auth.php` and `config/jwt.php`)
+2. **Authentication**: Laravel Sanctum (configured in `config/auth.php` and `config/sanctum.php`)
 3. **Queue**: Redis (configured in `config/queue.php`)
 
 ### Environment Variables
@@ -45,9 +45,6 @@ DB_PORT=5432
 DB_DATABASE=your_database
 DB_USERNAME=your_username
 DB_PASSWORD=your_password
-
-JWT_SECRET=your_jwt_secret
-JWT_TTL=1440
 
 QUEUE_CONNECTION=redis
 REDIS_HOST=127.0.0.1
@@ -74,12 +71,7 @@ cp .env.example .env
 php artisan key:generate
 ```
 
-4. Generate JWT secret:
-```bash
-php artisan jwt:secret
-```
-
-5. Run migrations:
+4. Run migrations:
 ```bash
 php artisan migrate
 ```

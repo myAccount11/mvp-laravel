@@ -9,7 +9,7 @@ use App\Services\V5\UserService;
 use App\Services\MailService;
 use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
-use Tymon\JWTAuth\Facades\JWTAuth;
+use Laravel\Sanctum\PersonalAccessToken;
 use Exception;
 
 class AuthController extends Controller
@@ -60,13 +60,38 @@ class AuthController extends Controller
     {
         try {
             $token = $request->query('token');
-            $payload = JWTAuth::setToken($token)->getPayload();
-            $userId = $payload->get('sub');
             
-            $this->userService->verifyUser($userId);
+            if (!$token) {
+                return response()->json(['error' => 'Token is required'], 400);
+            }
+            
+            // Find the token in Sanctum
+            $accessToken = PersonalAccessToken::findToken($token);
+            
+            if (!$accessToken) {
+                return response()->json(['error' => 'Invalid token'], 400);
+            }
+            
+            // Check if token has the verify-email ability
+            if (!in_array('verify-email', $accessToken->abilities ?? [])) {
+                return response()->json(['error' => 'Invalid token type'], 400);
+            }
+            
+            // Get the user from the token
+            $user = $accessToken->tokenable;
+            
+            if (!$user) {
+                return response()->json(['error' => 'User not found'], 404);
+            }
+            
+            $this->userService->verifyUser($user->id);
+            
+            // Delete the verification token after use
+            $accessToken->delete();
+            
             return response()->json(['message' => 'Email verified successfully']);
         } catch (Exception $e) {
-            return response()->json(['error' => 'Invalid token'], 400);
+            return response()->json(['error' => 'Invalid token: ' . $e->getMessage()], 400);
         }
     }
 
@@ -106,7 +131,36 @@ class AuthController extends Controller
         $request->validate([
             'email' => 'required|email',
             'new_password' => 'required|string|min:8',
+            'token' => 'nullable|string',
         ]);
+
+        // If token is provided, verify it
+        if ($request->has('token') && $request->input('token')) {
+            try {
+                $token = $request->input('token');
+                $accessToken = PersonalAccessToken::findToken($token);
+                
+                if (!$accessToken) {
+                    return response()->json(['error' => 'Invalid token'], 400);
+                }
+                
+                // Check if token has the reset-password ability
+                if (!in_array('reset-password', $accessToken->abilities ?? [])) {
+                    return response()->json(['error' => 'Invalid token type'], 400);
+                }
+                
+                // Verify the email matches the token's user
+                $user = $accessToken->tokenable;
+                if (!$user || $user->email !== $request->input('email')) {
+                    return response()->json(['error' => 'Token does not match email'], 400);
+                }
+                
+                // Delete the token after use
+                $accessToken->delete();
+            } catch (Exception $e) {
+                return response()->json(['error' => 'Invalid token: ' . $e->getMessage()], 400);
+            }
+        }
 
         $result = $this->authService->resetPassword($request->all());
         return response()->json($result);
