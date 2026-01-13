@@ -13,17 +13,16 @@ class Season extends Model
 
     protected $fillable = [
         'name',
-        'organizer_id',
     ];
-
-    public function organizer()
-    {
-        return $this->belongsTo(Organizer::class, 'organizer_id');
-    }
 
     public function seasonSports()
     {
         return $this->hasMany(SeasonSport::class, 'season_id');
+    }
+
+    public function sports()
+    {
+        return $this->belongsToMany(Sport::class, 'season_sports', 'season_id', 'sport_id');
     }
 }
 

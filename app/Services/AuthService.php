@@ -50,11 +50,6 @@ class AuthService
 
     public function registration(array $data)
     {
-        // Handle old user registration if in production
-        if (config('app.env') === 'prod') {
-            // Old user service logic would go here
-        }
-
         $user = $this->userService->createUser($data);
 
         if ($user && $user->password) {

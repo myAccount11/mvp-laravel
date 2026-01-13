@@ -14,18 +14,12 @@ use Exception;
 
 class AuthController extends Controller
 {
-    protected $authService;
-    protected $mailService;
-    protected $userService;
-
     public function __construct(
-        AuthService $authService,
-        MailService $mailService,
-        UserService $userService
-    ) {
-        $this->authService = $authService;
-        $this->mailService = $mailService;
-        $this->userService = $userService;
+        protected AuthService $authService,
+        protected MailService $mailService,
+        protected UserService $userService
+    )
+    {
     }
 
     public function login(LoginRequest $request): JsonResponse
@@ -60,35 +54,44 @@ class AuthController extends Controller
     {
         try {
             $token = $request->query('token');
-            
+
             if (!$token) {
                 return response()->json(['error' => 'Token is required'], 400);
             }
-            
+
+            // URL-decode the token in case it was URL-encoded
+            $token = urldecode($token);
+
             // Find the token in Sanctum
             $accessToken = PersonalAccessToken::findToken($token);
-            
+
             if (!$accessToken) {
                 return response()->json(['error' => 'Invalid token'], 400);
             }
-            
+
+            // Check if token has expired
+            if ($accessToken->expires_at && $accessToken->expires_at->isPast()) {
+                $accessToken->delete();
+                return response()->json(['error' => 'Token has expired. Please request a new verification email.'], 400);
+            }
+
             // Check if token has the verify-email ability
             if (!in_array('verify-email', $accessToken->abilities ?? [])) {
                 return response()->json(['error' => 'Invalid token type'], 400);
             }
-            
+
             // Get the user from the token
             $user = $accessToken->tokenable;
-            
+
             if (!$user) {
                 return response()->json(['error' => 'User not found'], 404);
             }
-            
+
             $this->userService->verifyUser($user->id);
-            
+
             // Delete the verification token after use
             $accessToken->delete();
-            
+
             return response()->json(['message' => 'Email verified successfully']);
         } catch (Exception $e) {
             return response()->json(['error' => 'Invalid token: ' . $e->getMessage()], 400);
@@ -119,42 +122,58 @@ class AuthController extends Controller
     public function me(Request $request): JsonResponse
     {
         $user = $request->user();
-        
-        // Load relations
-        $user->load(['seasonSports', 'roles', 'userRoles']);
-        
+
+        // Load relations including nested relations for user roles
+        $user->load([
+            'seasonSports.sport',
+            'seasonSports.season',
+            'roles',
+            'userRoles.role',
+        ]);
+
         return response()->json($user);
     }
 
     public function resetPassword(Request $request): JsonResponse
     {
         $request->validate([
-            'email' => 'required|email',
+            'email'        => 'required|email',
             'new_password' => 'required|string|min:8',
-            'token' => 'nullable|string',
+            'token'        => 'nullable|string',
         ]);
 
         // If token is provided, verify it
         if ($request->has('token') && $request->input('token')) {
             try {
                 $token = $request->input('token');
-                $accessToken = PersonalAccessToken::findToken($token);
+                // URL-decode the token in case it was URL-encoded
+                $token = urldecode($token);
                 
+                $accessToken = PersonalAccessToken::findToken($token);
+
                 if (!$accessToken) {
                     return response()->json(['error' => 'Invalid token'], 400);
                 }
-                
-                // Check if token has the reset-password ability
-                if (!in_array('reset-password', $accessToken->abilities ?? [])) {
+
+                // Check if token has expired
+                if ($accessToken->expires_at && $accessToken->expires_at->isPast()) {
+                    $accessToken->delete();
+                    return response()->json(['error' => 'Token has expired. Please request a new password reset.'], 400);
+                }
+
+                // Check if token has the reset-password or create-password ability
+                $validAbilities = ['reset-password', 'create-password'];
+                $hasValidAbility = !empty(array_intersect($validAbilities, $accessToken->abilities ?? []));
+                if (!$hasValidAbility) {
                     return response()->json(['error' => 'Invalid token type'], 400);
                 }
-                
+
                 // Verify the email matches the token's user
                 $user = $accessToken->tokenable;
                 if (!$user || $user->email !== $request->input('email')) {
                     return response()->json(['error' => 'Token does not match email'], 400);
                 }
-                
+
                 // Delete the token after use
                 $accessToken->delete();
             } catch (Exception $e) {
@@ -179,13 +198,13 @@ class AuthController extends Controller
     public function changePassword(Request $request): JsonResponse
     {
         $request->validate([
-            'email' => 'required|email',
+            'email'            => 'required|email',
             'current_password' => 'required|string',
-            'new_password' => 'required|string|min:8',
+            'new_password'     => 'required|string|min:8',
         ]);
 
         $result = $this->authService->changePassword($request->all());
-        
+
         if (is_string($result)) {
             return response()->json(['error' => $result], 400);
         }

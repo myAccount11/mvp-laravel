@@ -12,7 +12,13 @@ class Kernel extends ConsoleKernel
      */
     protected function schedule(Schedule $schedule): void
     {
-        // $schedule->command('inspire')->hourly();
+        // Create new season on May 31st each year at midnight
+        // Season format: current_year/next_year (e.g., 2024/2025)
+        $schedule->command('season:create')
+            ->yearlyOn(5, 31, '00:00')  // May 31st at midnight
+            ->withoutOverlapping()
+            ->onOneServer()
+            ->runInBackground();
     }
 
     /**

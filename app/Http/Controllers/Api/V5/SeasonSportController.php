@@ -26,9 +26,10 @@ class SeasonSportController extends Controller
         }
     }
 
-    public function findAll(): JsonResponse
+    public function findAll(Request $request): JsonResponse
     {
-        $seasonSports = $this->seasonSportService->findAll();
+        $include = $request->query('include');
+        $seasonSports = $this->seasonSportService->findAll($include);
         return response()->json($seasonSports);
     }
 

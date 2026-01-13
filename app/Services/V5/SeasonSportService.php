@@ -4,6 +4,7 @@ namespace App\Services\V5;
 
 use App\Models\V5\SeasonSport;
 use App\Repositories\V5\SeasonSportRepository;
+use Illuminate\Database\Eloquent\Collection;
 
 class SeasonSportService
 {
@@ -12,6 +13,19 @@ class SeasonSportService
     public function __construct(SeasonSportRepository $seasonSportRepository)
     {
         $this->seasonSportRepository = $seasonSportRepository;
+    }
+
+    public function findAll($include = null): Collection
+    {
+        $query = $this->seasonSportRepository->query();
+
+        if ($include) {
+            // Parse include parameter (can be comma-separated string or array)
+            $relations = is_array($include) ? $include : explode(',', $include);
+            $query->with($relations);
+        }
+
+        return $query->get();
     }
 
     public function findOne(array $condition): ?SeasonSport
@@ -51,6 +65,21 @@ class SeasonSportService
         }
 
         return $query->first();
+    }
+
+    public function create(array $data): SeasonSport
+    {
+        return $this->seasonSportRepository->create($data);
+    }
+
+    public function update(int $id, array $data): bool
+    {
+        return $this->seasonSportRepository->update($id, $data);
+    }
+
+    public function delete(int $id): bool
+    {
+        return $this->seasonSportRepository->delete($id);
     }
 }
 

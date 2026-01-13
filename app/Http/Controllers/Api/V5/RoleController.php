@@ -30,9 +30,9 @@ class RoleController extends Controller
         return response()->json($role);
     }
 
-    public function assignUserRole($roleId, $userId, AssignUserRoleRequest $request, Request $req): JsonResponse
+    public function assignUserRole($roleId, $userId, AssignUserRoleRequest $request): JsonResponse
     {
-        $user = $req->user();
+        $user = auth()->user();
         $this->roleService->addUserRole(
             $user,
             $userId,

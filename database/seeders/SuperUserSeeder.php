@@ -2,6 +2,7 @@
 
 namespace Database\Seeders;
 
+use App\Models\V5\Role;
 use App\Models\V5\User;
 use App\Models\V5\UserRole;
 use App\Models\V5\SeasonSport;
@@ -23,15 +24,16 @@ class SuperUserSeeder extends Seeder
                 'password' => Hash::make('mvpadmin123'),
             ]
         );
+        $superAdminRole = Role::query()->where('value', 'super_admin')->first();
 
         UserRole::updateOrCreate(
             [
                 'user_id' => $user->id,
-                'role_id' => 1000,
+                'role_id' => $superAdminRole->id,
             ],
             [
                 'user_id' => $user->id,
-                'role_id' => 1000,
+                'role_id' => $superAdminRole->id,
                 'user_role_approved_by_user_id' => 1,
                 'club_id' => null,
                 'team_id' => null,
@@ -42,10 +44,10 @@ class SuperUserSeeder extends Seeder
 
         // Attach user to latest season sports (from the latest season)
         $latestSeason = \App\Models\V5\Season::orderBy('id', 'desc')->first();
-        
+
         if ($latestSeason) {
             $latestSeasonSports = SeasonSport::where('season_id', $latestSeason->id)->get();
-            
+
             foreach ($latestSeasonSports as $seasonSport) {
                 UserSeasonSport::updateOrCreate(
                     [

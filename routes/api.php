@@ -281,6 +281,7 @@ Route::middleware(['auth:sanctum'])->group(function () {
 
         Route::prefix('user-season-sports')->group(function () {
             Route::get('/', [\App\Http\Controllers\Api\V5\UserSeasonSportsController::class, 'getAll']);
+            Route::get('/existing-and-latest', [\App\Http\Controllers\Api\V5\UserSeasonSportsController::class, 'getExistingAndLatest']);
             Route::post('/', [\App\Http\Controllers\Api\V5\UserSeasonSportsController::class, 'create']);
             Route::get('/{id}', [\App\Http\Controllers\Api\V5\UserSeasonSportsController::class, 'getById']);
             Route::put('/{id}', [\App\Http\Controllers\Api\V5\UserSeasonSportsController::class, 'update']);

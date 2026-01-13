@@ -15,6 +15,12 @@ class Role extends Model
         'value',
         'description',
     ];
+    const SUPER_ADMIN = 'super_admin';
+    const CLUB_MANAGER = 'club_manager';
+    const HEAD_COACH = 'head_coach';
+    const ASSISTANT_COACH = 'assistant_coach';
+    const TEAM_MANAGER = 'team_manager';
+    const PLAYER = 'player';
 
     public function users()
     {

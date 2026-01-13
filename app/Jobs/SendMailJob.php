@@ -13,11 +13,8 @@ class SendMailJob implements ShouldQueue
 {
     use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
 
-    protected $mailData;
-
-    public function __construct(array $mailData)
+    public function __construct(protected array $mailData)
     {
-        $this->mailData = $mailData;
     }
 
     public function handle()

@@ -14,19 +14,15 @@ class SportsSeeder extends Seeder
     {
         $sports = [
             [
-                'id' => 1,
                 'name' => 'Basketball',
             ],
             [
-                'id' => 2,
                 'name' => 'Volleyball',
             ],
             [
-                'id' => 3,
                 'name' => 'Floorball',
             ],
             [
-                'id' => 4,
                 'name' => 'American Football',
             ],
         ];

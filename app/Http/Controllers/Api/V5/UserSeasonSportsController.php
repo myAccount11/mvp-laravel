@@ -18,13 +18,26 @@ class UserSeasonSportsController extends Controller
 
     public function create(Request $request): JsonResponse
     {
-        $userSeasonSport = $this->userSeasonSportsService->create($request->all());
-        return response()->json($userSeasonSport, 201);
+        try {
+            // If sport_id is provided, find the newest season_sport for that sport
+            if ($request->has('sport_id') && !$request->has('season_sport_id')) {
+                $userSeasonSport = $this->userSeasonSportsService->createWithSportId($request->all());
+            } else {
+                $userSeasonSport = $this->userSeasonSportsService->create($request->all());
+            }
+            
+            return response()->json($userSeasonSport, 201);
+        } catch (\Exception $e) {
+            return response()->json(['message' => $e->getMessage()], 400);
+        }
     }
 
-    public function getAll(): JsonResponse
+    public function getAll(Request $request): JsonResponse
     {
-        $userSeasonSports = $this->userSeasonSportsService->findAll();
+        $userId = $request->query('user_id');
+        $include = $request->query('include');
+        
+        $userSeasonSports = $this->userSeasonSportsService->findAllWithFilters($userId, $include);
         return response()->json($userSeasonSports);
     }
 
@@ -51,6 +64,26 @@ class UserSeasonSportsController extends Controller
     {
         $result = $this->userSeasonSportsService->update($id, $request->all());
         return response()->json($result);
+    }
+
+    /**
+     * Get user's existing season sports and latest season sports for their sports.
+     */
+    public function getExistingAndLatest(Request $request): JsonResponse
+    {
+        try {
+            $user = $request->user();
+            
+            if (!$user) {
+                return response()->json(['message' => 'Unauthorized'], 401);
+            }
+
+            $result = $this->userSeasonSportsService->getExistingAndLatestSeasonSports($user->id);
+            
+            return response()->json($result);
+        } catch (\Exception $e) {
+            return response()->json(['message' => $e->getMessage()], 400);
+        }
     }
 }
 
