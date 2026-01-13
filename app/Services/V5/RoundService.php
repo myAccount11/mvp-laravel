@@ -6,6 +6,7 @@ use App\Models\V5\Round;
 use App\Repositories\V5\RoundRepository;
 use App\Services\V5\TournamentService;
 use Carbon\Carbon;
+use Illuminate\Database\Eloquent\Collection;
 
 class RoundService
 {
@@ -23,15 +24,15 @@ class RoundService
         if (empty($conditions)) {
             return $this->roundRepository->all();
         }
-        
+
         $query = $this->roundRepository->query();
-        
+
         if (isset($conditions['where'])) {
             foreach ($conditions['where'] as $key => $value) {
                 $query->where($key, $value);
             }
         }
-        
+
         return $query->get();
     }
 
@@ -45,17 +46,17 @@ class RoundService
         return $this->roundRepository->create($data);
     }
 
-    public function createMany(array $data): \Illuminate\Support\Collection
+    public function createMany(array $data): Collection
     {
         // Convert 0 to null for tournament_id (foreign key constraint)
-        $tournamentId = (isset($data['tournament_id']) && ($data['tournament_id'] === 0 || $data['tournament_id'] === '0' || empty($data['tournament_id']))) 
-            ? null 
+        $tournamentId = (isset($data['tournament_id']) && ($data['tournament_id'] === 0 || $data['tournament_id'] === '0' || empty($data['tournament_id'])))
+            ? null
             : ($data['tournament_id'] ?? null);
-        
+
         if (!isset($data['start_date']) || !isset($data['end_date'])) {
             throw new \Exception('start_date and end_date are required');
         }
-        
+
         $startDate = Carbon::parse($data['start_date']);
         $endDate = Carbon::parse($data['end_date']);
 
@@ -85,7 +86,9 @@ class RoundService
         if (!empty($insertData)) {
             $this->roundRepository->query()->insert($insertData);
         }
-        return collect($insertData);
+        return $this->roundRepository->query()
+            ->where('tournament_id', $tournamentId)
+            ->get();
     }
 
     public function recreate(array $data): \Illuminate\Support\Collection
@@ -114,7 +117,7 @@ class RoundService
         }
 
         $tournamentId = $data[0]['tournament_id'] ?? null;
-        
+
         // Convert 0 to null for tournament_id (foreign key constraint)
         if ($tournamentId === 0 || $tournamentId === '0') {
             $tournamentId = null;
@@ -183,6 +186,11 @@ class RoundService
             $query->where($conditions['where']);
         }
         return $query->delete();
+    }
+
+    public function destroyByIds(array $roundIds): int
+    {
+        return $this->roundRepository->query()->whereIn('id', $roundIds)->delete();
     }
 }
 

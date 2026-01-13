@@ -55,13 +55,13 @@ class RoundController extends Controller
     public function getAll(Request $request): JsonResponse
     {
         $tournamentId = $request->query('tournament_id');
-        
+
         if ($tournamentId) {
             $rounds = $this->roundService->findAll(['where' => ['tournament_id' => $tournamentId]]);
         } else {
             $rounds = $this->roundService->findAll();
         }
-        
+
         return response()->json($rounds);
     }
 
@@ -85,9 +85,7 @@ class RoundController extends Controller
             return response()->json(['message' => 'rounds array is required'], 400);
         }
 
-        $deleted = $this->roundService->destroyByCondition([
-            'where' => [['id', 'IN', $rounds]],
-        ]);
+        $deleted = $this->roundService->destroyByIds($rounds);
         return response()->json(['deleted' => $deleted, 'message' => "Deleted {$deleted} rounds"]);
     }
 
