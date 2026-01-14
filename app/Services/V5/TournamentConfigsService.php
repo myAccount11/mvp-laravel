@@ -7,11 +7,8 @@ use App\Repositories\V5\TournamentConfigRepository;
 
 class TournamentConfigsService
 {
-    protected TournamentConfigRepository $tournamentConfigRepository;
-
-    public function __construct(TournamentConfigRepository $tournamentConfigRepository)
+    public function __construct(protected TournamentConfigRepository $tournamentConfigRepository)
     {
-        $this->tournamentConfigRepository = $tournamentConfigRepository;
     }
 
     public function findOne(array $condition): ?TournamentConfig

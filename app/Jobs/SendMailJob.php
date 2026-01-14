@@ -19,8 +19,6 @@ class SendMailJob implements ShouldQueue
 
     public function handle()
     {
-        // This will be implemented with actual mail template rendering
-        // For now, it's a placeholder
         Mail::send(
             "emails.{$this->mailData['template']}",
             $this->mailData['context'],

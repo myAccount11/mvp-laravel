@@ -7,11 +7,8 @@ use App\Repositories\V5\TournamentProgramRepository;
 
 class TournamentProgramsService
 {
-    protected TournamentProgramRepository $tournamentProgramRepository;
-
-    public function __construct(TournamentProgramRepository $tournamentProgramRepository)
+    public function __construct(protected TournamentProgramRepository $tournamentProgramRepository)
     {
-        $this->tournamentProgramRepository = $tournamentProgramRepository;
     }
 
     public function findOne(array $condition): ?TournamentProgram

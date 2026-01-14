@@ -11,18 +11,11 @@ use App\Models\V5\UserRole;
 
 class RefereeService
 {
-    protected RefereeRepository $refereeRepository;
-    protected UserService $userService;
-    protected PersonService $personService;
-
     public function __construct(
-        RefereeRepository $refereeRepository,
-        UserService $userService,
-        PersonService $personService
+        protected RefereeRepository $refereeRepository,
+        protected UserService $userService,
+        protected PersonService $personService
     ) {
-        $this->refereeRepository = $refereeRepository;
-        $this->userService = $userService;
-        $this->personService = $personService;
     }
 
     public function findAllReferees(array $queryParams): array

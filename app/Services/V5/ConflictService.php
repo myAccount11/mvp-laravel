@@ -8,11 +8,8 @@ use Illuminate\Database\Eloquent\Collection;
 
 class ConflictService
 {
-    protected ConflictRepository $conflictRepository;
-
-    public function __construct(ConflictRepository $conflictRepository)
+    public function __construct(protected ConflictRepository $conflictRepository)
     {
-        $this->conflictRepository = $conflictRepository;
     }
 
     public function findAll(array $conditions = []): Collection

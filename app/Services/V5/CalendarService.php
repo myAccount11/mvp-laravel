@@ -3,22 +3,8 @@
 namespace App\Services\V5;
 
 use App\Models\V5\Game;
-use App\Models\V5\Tournament;
-use App\Models\V5\TournamentGroup;
-use App\Models\V5\TournamentConfig;
-use App\Models\V5\Team;
-use App\Models\V5\Club;
-use App\Models\V5\Court;
-use App\Models\V5\ReservationType;
 use App\Models\V5\TimeSlot;
 use App\Models\V5\Suggestion;
-use App\Services\V5\CourtService;
-use App\Services\V5\GameService;
-use App\Services\V5\TimeSlotService;
-use App\Services\V5\ReservationService;
-use App\Services\V5\SuggestionService;
-use App\Services\V5\TeamService;
-use App\Services\V5\UserService;
 use Carbon\Carbon;
 
 class CalendarService
@@ -33,7 +19,6 @@ class CalendarService
 
     public function __construct()
     {
-        // No dependencies - use lazy loading
     }
 
     // Lazy loading methods for services

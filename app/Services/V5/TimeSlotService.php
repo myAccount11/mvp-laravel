@@ -8,15 +8,10 @@ use Carbon\Carbon;
 
 class TimeSlotService
 {
-    protected TimeSlotRepository $timeSlotRepository;
-    protected SeasonSportService $seasonSportService;
-
     public function __construct(
-        TimeSlotRepository $timeSlotRepository,
-        SeasonSportService $seasonSportService
+        protected TimeSlotRepository $timeSlotRepository,
+        protected SeasonSportService $seasonSportService
     ) {
-        $this->timeSlotRepository = $timeSlotRepository;
-        $this->seasonSportService = $seasonSportService;
     }
 
     public function findAll(array $conditions = []): \Illuminate\Database\Eloquent\Collection

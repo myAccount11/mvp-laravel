@@ -5,39 +5,18 @@ namespace App\Services\V5;
 use App\Models\V5\CoachEducation;
 use App\Models\V5\CoachEducationLicenseType;
 use App\Repositories\V5\CoachEducationRepository;
-use App\Services\V5\CoachService;
-use App\Services\V5\UserService;
-use App\Services\V5\UserSeasonSportsService;
-use App\Services\V5\PersonService;
-use App\Services\V5\SeasonService;
-use App\Services\V5\CoachLicenseService;
 
 class CoachEducationService
 {
-    protected CoachEducationRepository $coachEducationRepository;
-    protected CoachService $coachService;
-    protected UserService $userService;
-    protected UserSeasonSportsService $userSeasonSportsService;
-    protected PersonService $personService;
-    protected SeasonService $seasonService;
-    protected CoachLicenseService $coachLicenseService;
-
     public function __construct(
-        CoachEducationRepository $coachEducationRepository,
-        CoachService $coachService,
-        UserService $userService,
-        UserSeasonSportsService $userSeasonSportsService,
-        PersonService $personService,
-        SeasonService $seasonService,
-        CoachLicenseService $coachLicenseService
+        protected CoachEducationRepository $coachEducationRepository,
+        protected CoachService $coachService,
+        protected UserService $userService,
+        protected UserSeasonSportsService $userSeasonSportsService,
+        protected PersonService $personService,
+        protected SeasonService $seasonService,
+        protected CoachLicenseService $coachLicenseService
     ) {
-        $this->coachEducationRepository = $coachEducationRepository;
-        $this->coachService = $coachService;
-        $this->userService = $userService;
-        $this->userSeasonSportsService = $userSeasonSportsService;
-        $this->personService = $personService;
-        $this->seasonService = $seasonService;
-        $this->coachLicenseService = $coachLicenseService;
     }
 
     public function findOne(array $condition): ?CoachEducation

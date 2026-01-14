@@ -12,16 +12,12 @@ use App\Models\V5\TournamentGroup;
 
 class TournamentService
 {
-    protected TournamentRepository $tournamentRepository;
-    protected PoolRepository $poolRepository;
     protected ?TeamService $teamService = null;
 
     public function __construct(
-        TournamentRepository $tournamentRepository,
-        PoolRepository $poolRepository
+        protected TournamentRepository $tournamentRepository,
+        protected PoolRepository $poolRepository
     ) {
-        $this->tournamentRepository = $tournamentRepository;
-        $this->poolRepository = $poolRepository;
     }
 
     /**
@@ -44,12 +40,12 @@ class TournamentService
         }
 
         $tournament = $this->tournamentRepository->findOneBy($whereConditions, ['*'], $includeRelations);
-        
+
         // Load relations if tournament found and relations were requested
         if ($tournament && !empty($includeRelations)) {
             $tournament->load($includeRelations);
         }
-        
+
         return $tournament;
     }
 
@@ -99,10 +95,10 @@ class TournamentService
 
         // Build where conditions
         $whereConditions = [];
-        
+
         // Always filter by teams in the tournament group
         $whereConditions[] = ['id', 'in', $allTeams];
-        
+
         // Only exclude existing teams if there are any
         if (!empty($existingTeams)) {
             $whereConditions[] = ['id', 'not in', $existingTeams];
@@ -147,7 +143,7 @@ class TournamentService
 
         // Apply ordering
         $query->orderBy($conditions['orderBy'] ?? 'id', $conditions['orderDirection'] ?? 'ASC');
-        
+
         // Apply pagination
         $limit = (int)($conditions['limit'] ?? 20);
         $page = (int)($conditions['page'] ?? 1);

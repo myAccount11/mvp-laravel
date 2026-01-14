@@ -12,7 +12,10 @@ return new class extends Migration
             $table->id();
             $table->foreignId('team_id')->constrained('teams');
             $table->foreignId('tournament_id')->constrained('tournaments');
-            $table->timestamps();
+            $table->unsignedBigInteger('pool_id')->nullable();
+            $table->integer('pool_key')->nullable();
+            $table->integer('start_points')->nullable();
+            $table->boolean('is_deleted')->default(false);
         });
     }
 

@@ -7,11 +7,8 @@ use App\Repositories\V5\TournamentRegistrationTypeRepository;
 
 class TournamentRegistrationTypesService
 {
-    protected TournamentRegistrationTypeRepository $tournamentRegistrationTypeRepository;
-
-    public function __construct(TournamentRegistrationTypeRepository $tournamentRegistrationTypeRepository)
+    public function __construct(protected TournamentRegistrationTypeRepository $tournamentRegistrationTypeRepository)
     {
-        $this->tournamentRegistrationTypeRepository = $tournamentRegistrationTypeRepository;
     }
 
     public function findOne(array $condition): ?TournamentRegistrationType

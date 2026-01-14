@@ -10,13 +10,11 @@ use Illuminate\Database\Eloquent\Collection;
 
 class RoundService
 {
-    protected RoundRepository $roundRepository;
-    protected TournamentService $tournamentService;
-
-    public function __construct(RoundRepository $roundRepository, TournamentService $tournamentService)
+    public function __construct(
+        protected RoundRepository $roundRepository,
+        protected TournamentService $tournamentService
+    )
     {
-        $this->roundRepository = $roundRepository;
-        $this->tournamentService = $tournamentService;
     }
 
     public function findAll(array $conditions = []): \Illuminate\Database\Eloquent\Collection

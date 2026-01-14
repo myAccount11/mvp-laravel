@@ -21,30 +21,16 @@ use App\Models\V5\CoachHistory;
 
 class CoachService
 {
-    protected CoachRepository $coachRepository;
-    protected UserService $userService;
-    protected PersonService $personService;
-    protected TournamentGroupService $tournamentGroupService;
-    protected TeamService $teamService;
-    protected CoachLicenseService $coachLicenseService;
-    protected MailService $mailService;
-
     public function __construct(
-        CoachRepository $coachRepository,
-        UserService $userService,
-        PersonService $personService,
-        TournamentGroupService $tournamentGroupService,
-        TeamService $teamService,
-        CoachLicenseService $coachLicenseService,
-        MailService $mailService
-    ) {
-        $this->coachRepository = $coachRepository;
-        $this->userService = $userService;
-        $this->personService = $personService;
-        $this->tournamentGroupService = $tournamentGroupService;
-        $this->teamService = $teamService;
-        $this->coachLicenseService = $coachLicenseService;
-        $this->mailService = $mailService;
+        protected CoachRepository        $coachRepository,
+        protected UserService            $userService,
+        protected PersonService          $personService,
+        protected TournamentGroupService $tournamentGroupService,
+        protected TeamService            $teamService,
+        protected CoachLicenseService    $coachLicenseService,
+        protected MailService            $mailService
+    )
+    {
     }
 
     public function findAllCoachesByFiltersOrWithout(array $queryParams): array
@@ -104,7 +90,7 @@ class CoachService
             } else {
                 $personConditions[] = function ($query) use ($searchTerm) {
                     $query->where('name', 'ILIKE', "%{$searchTerm}%")
-                          ->orWhere('email', 'ILIKE', "%{$searchTerm}%");
+                        ->orWhere('email', 'ILIKE', "%{$searchTerm}%");
                 };
             }
         }
@@ -139,7 +125,7 @@ class CoachService
 
         if ($orderBy === 'email' || $orderBy === 'name') {
             $query->join('person', 'coach.person_id', '=', 'person.id')
-                  ->orderBy("person.{$orderBy}", $orderDirection);
+                ->orderBy("person.{$orderBy}", $orderDirection);
         } else {
             $query->orderBy($orderBy, $orderDirection);
         }
@@ -218,7 +204,7 @@ class CoachService
             $formattedEnd = $formatDate($end);
 
             $coachLicense = $this->coachLicenseService->findOne([
-                'coach_id' => $coachId,
+                'coach_id'              => $coachId,
                 'coach_license_type_id' => $typeId,
             ]);
 
@@ -226,15 +212,15 @@ class CoachService
                 if ($coachLicense) {
                     $this->coachLicenseService->update($coachLicense->id, [
                         'deleted' => false,
-                        'start' => $formattedStart,
-                        'end' => $formattedEnd,
+                        'start'   => $formattedStart,
+                        'end'     => $formattedEnd,
                     ]);
                 } else {
                     $coachLicense = $this->coachLicenseService->create([
                         'coach_license_type_id' => $typeId,
-                        'coach_id' => $coachId,
-                        'start' => $formattedStart,
-                        'end' => $formattedEnd,
+                        'coach_id'              => $coachId,
+                        'start'                 => $formattedStart,
+                        'end'                   => $formattedEnd,
                     ]);
                 }
 

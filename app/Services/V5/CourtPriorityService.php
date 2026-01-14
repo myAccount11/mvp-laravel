@@ -7,11 +7,8 @@ use App\Repositories\V5\CourtPriorityRepository;
 
 class CourtPriorityService
 {
-    protected CourtPriorityRepository $courtPriorityRepository;
-
-    public function __construct(CourtPriorityRepository $courtPriorityRepository)
+    public function __construct(protected CourtPriorityRepository $courtPriorityRepository)
     {
-        $this->courtPriorityRepository = $courtPriorityRepository;
     }
 
     public function findOne(array $condition): ?CourtPriority

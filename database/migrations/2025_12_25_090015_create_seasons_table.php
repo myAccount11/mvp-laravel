@@ -11,7 +11,6 @@ return new class extends Migration
         Schema::create('seasons', function (Blueprint $table) {
             $table->id();
             $table->string('name');
-            $table->foreignId('organizer_id')->constrained('organizers');
             $table->timestamps();
         });
     }

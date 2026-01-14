@@ -29,7 +29,6 @@ class SportsSeeder extends Seeder
 
         foreach ($sports as $sport) {
             Sport::updateOrCreate(
-                ['id' => $sport['id']],
                 $sport
             );
         }

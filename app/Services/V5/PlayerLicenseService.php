@@ -7,11 +7,8 @@ use App\Repositories\V5\PlayerLicenseRepository;
 
 class PlayerLicenseService
 {
-    protected PlayerLicenseRepository $playerLicenseRepository;
-
-    public function __construct(PlayerLicenseRepository $playerLicenseRepository)
+    public function __construct(protected PlayerLicenseRepository $playerLicenseRepository)
     {
-        $this->playerLicenseRepository = $playerLicenseRepository;
     }
 
     public function findOne(array $condition): ?PlayerLicense

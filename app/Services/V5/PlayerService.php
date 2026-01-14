@@ -7,11 +7,8 @@ use App\Repositories\V5\PlayerRepository;
 
 class PlayerService
 {
-    protected PlayerRepository $playerRepository;
-
-    public function __construct(PlayerRepository $playerRepository)
+    public function __construct(protected PlayerRepository $playerRepository)
     {
-        $this->playerRepository = $playerRepository;
     }
 
     public function findAll(string $orderBy = 'id', string $orderDirection = 'asc'): \Illuminate\Database\Eloquent\Collection

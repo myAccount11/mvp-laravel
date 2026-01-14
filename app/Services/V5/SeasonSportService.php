@@ -8,11 +8,8 @@ use Illuminate\Database\Eloquent\Collection;
 
 class SeasonSportService
 {
-    protected SeasonSportRepository $seasonSportRepository;
-
-    public function __construct(SeasonSportRepository $seasonSportRepository)
+    public function __construct(protected SeasonSportRepository $seasonSportRepository)
     {
-        $this->seasonSportRepository = $seasonSportRepository;
     }
 
     public function findAll($include = null): Collection

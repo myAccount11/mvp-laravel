@@ -7,11 +7,8 @@ use App\Repositories\V5\LeagueRepository;
 
 class LeagueService
 {
-    protected LeagueRepository $leagueRepository;
-
-    public function __construct(LeagueRepository $leagueRepository)
+    public function __construct(protected LeagueRepository $leagueRepository)
     {
-        $this->leagueRepository = $leagueRepository;
     }
 
     public function findAll(array $conditions = []): \Illuminate\Database\Eloquent\Collection

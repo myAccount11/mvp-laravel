@@ -7,11 +7,8 @@ use App\Repositories\V5\SportRepository;
 
 class SportService
 {
-    protected SportRepository $sportRepository;
-
-    public function __construct(SportRepository $sportRepository)
+    public function __construct(protected SportRepository $sportRepository)
     {
-        $this->sportRepository = $sportRepository;
     }
 
     public function findAll(string $orderBy = 'id', string $orderDirection = 'asc'): \Illuminate\Database\Eloquent\Collection

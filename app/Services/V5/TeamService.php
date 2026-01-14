@@ -12,15 +12,13 @@ use App\Models\V5\User;
 
 class TeamService
 {
-    protected $teamRepository;
     protected ?UserService $userService = null;
     protected ?PersonService $personService = null;
     protected ?PlayerService $playerService = null;
     protected ?MessageService $messageService = null;
 
-    public function __construct(TeamRepository $teamRepository)
+    public function __construct(protected TeamRepository $teamRepository)
     {
-        $this->teamRepository = $teamRepository;
     }
 
     protected function getUserService(): UserService

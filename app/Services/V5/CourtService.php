@@ -5,19 +5,14 @@ namespace App\Services\V5;
 use App\Models\V5\Court;
 use App\Repositories\V5\CourtRepository;
 use App\Repositories\V5\CourtUsageRepository;
-use App\Models\V5\CourtUsage;
 
 class CourtService
 {
-    protected CourtRepository $courtRepository;
-    protected CourtUsageRepository $courtUsageRepository;
-
     public function __construct(
-        CourtRepository $courtRepository,
-        CourtUsageRepository $courtUsageRepository
-    ) {
-        $this->courtRepository = $courtRepository;
-        $this->courtUsageRepository = $courtUsageRepository;
+        protected CourtRepository      $courtRepository,
+        protected CourtUsageRepository $courtUsageRepository
+    )
+    {
     }
 
     public function getCourts(int $limit, int $offset): array
@@ -123,7 +118,7 @@ class CourtService
         }
 
         $existingUsage = $this->courtUsageRepository->findOneBy([
-            'court_id' => $courtId,
+            'court_id'             => $courtId,
             'court_requirement_id' => $requirementId,
         ]);
 
@@ -142,9 +137,9 @@ class CourtService
             // Only create if count is greater than 0
             if ($count > 0) {
                 $this->courtUsageRepository->create([
-                    'court_id' => $courtId,
+                    'court_id'             => $courtId,
                     'court_requirement_id' => $requirementId,
-                    'court_usage_count' => $count,
+                    'court_usage_count'    => $count,
                 ]);
             }
         }

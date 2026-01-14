@@ -7,11 +7,8 @@ use App\Repositories\V5\ReservationTypeRepository;
 
 class ReservationTypesService
 {
-    protected ReservationTypeRepository $reservationTypeRepository;
-
-    public function __construct(ReservationTypeRepository $reservationTypeRepository)
+    public function __construct(protected ReservationTypeRepository $reservationTypeRepository)
     {
-        $this->reservationTypeRepository = $reservationTypeRepository;
     }
 
     public function findOne(array $condition): ?ReservationType

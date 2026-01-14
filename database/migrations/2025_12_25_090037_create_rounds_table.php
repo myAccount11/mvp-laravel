@@ -14,8 +14,8 @@ return new class extends Migration
             $table->foreignId('tournament_id')->nullable()->constrained('tournaments')->onDelete('set null');
             $table->date('from_date')->nullable();
             $table->date('to_date')->nullable();
-            $table->integer('week');
-            $table->integer('year');
+            $table->integer('week')->nullable();
+            $table->integer('year')->nullable();
             $table->integer('type')->default(0);
             $table->boolean('force_cross')->default(false);
             $table->boolean('deleted')->default(false);

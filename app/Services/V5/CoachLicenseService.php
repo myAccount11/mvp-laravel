@@ -7,11 +7,8 @@ use App\Repositories\V5\CoachLicenseRepository;
 
 class CoachLicenseService
 {
-    protected CoachLicenseRepository $coachLicenseRepository;
-
-    public function __construct(CoachLicenseRepository $coachLicenseRepository)
+    public function __construct(protected CoachLicenseRepository $coachLicenseRepository)
     {
-        $this->coachLicenseRepository = $coachLicenseRepository;
     }
 
     public function findOne(array $condition): ?CoachLicense

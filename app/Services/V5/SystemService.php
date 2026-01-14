@@ -7,11 +7,8 @@ use App\Repositories\V5\SystemRepository;
 
 class SystemService
 {
-    protected SystemRepository $systemRepository;
-
-    public function __construct(SystemRepository $systemRepository)
+    public function __construct(protected SystemRepository $systemRepository)
     {
-        $this->systemRepository = $systemRepository;
     }
 
     public function findOne(array $condition): ?System

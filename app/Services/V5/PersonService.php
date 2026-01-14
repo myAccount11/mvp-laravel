@@ -4,39 +4,22 @@ namespace App\Services\V5;
 
 use App\Models\V5\Person;
 use App\Repositories\V5\PersonRepository;
-use App\Services\V5\UserService;
-use App\Services\V5\CoachService;
-use App\Services\V5\PlayerService;
-use App\Services\V5\SeasonService;
-use App\Services\V5\SystemService;
-use App\Services\V5\PlayerLicenseService;
 use App\Models\V5\UserRole;
 use Carbon\Carbon;
+use Illuminate\Database\Eloquent\Collection;
 
 class PersonService
 {
-    protected PersonRepository $personRepository;
-    protected UserService $userService;
     protected ?CoachService $coachService = null;
-    protected PlayerService $playerService;
-    protected SeasonService $seasonService;
-    protected SystemService $systemService;
-    protected PlayerLicenseService $playerLicenseService;
 
     public function __construct(
-        PersonRepository $personRepository,
-        UserService $userService,
-        PlayerService $playerService,
-        SeasonService $seasonService,
-        SystemService $systemService,
-        PlayerLicenseService $playerLicenseService
+        protected PersonRepository $personRepository,
+        protected UserService $userService,
+        protected PlayerService $playerService,
+        protected SeasonService $seasonService,
+        protected SystemService $systemService,
+        protected PlayerLicenseService $playerLicenseService
     ) {
-        $this->personRepository = $personRepository;
-        $this->userService = $userService;
-        $this->playerService = $playerService;
-        $this->seasonService = $seasonService;
-        $this->systemService = $systemService;
-        $this->playerLicenseService = $playerLicenseService;
     }
 
     protected function getCoachService(): CoachService
@@ -44,7 +27,7 @@ class PersonService
         return $this->coachService ??= app(CoachService::class);
     }
 
-    public function findAll(string $orderBy = 'id', string $orderDirection = 'asc'): \Illuminate\Database\Eloquent\Collection
+    public function findAll(string $orderBy = 'id', string $orderDirection = 'asc'): Collection
     {
         return $this->personRepository->query()->orderBy($orderBy, $orderDirection)->get();
     }

@@ -14,7 +14,6 @@ use Carbon\Carbon;
 
 class GameService
 {
-    protected GameRepository $gameRepository;
     protected ?TournamentService $tournamentService = null;
     protected ?GameDraftService $gameDraftService = null;
     protected ?CourtService $courtService = null;
@@ -30,9 +29,8 @@ class GameService
     protected ?MessageService $messageService = null;
     protected ?TournamentProgramItemsService $tournamentProgramItemsService = null;
 
-    public function __construct(GameRepository $gameRepository)
+    public function __construct(protected GameRepository $gameRepository)
     {
-        $this->gameRepository = $gameRepository;
     }
 
     // Lazy loading methods for services

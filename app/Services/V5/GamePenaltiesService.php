@@ -7,11 +7,8 @@ use App\Repositories\V5\GamePenaltyRepository;
 
 class GamePenaltiesService
 {
-    protected GamePenaltyRepository $gamePenaltyRepository;
-
-    public function __construct(GamePenaltyRepository $gamePenaltyRepository)
+    public function __construct(protected GamePenaltyRepository $gamePenaltyRepository)
     {
-        $this->gamePenaltyRepository = $gamePenaltyRepository;
     }
 
     public function findOne(array $condition): ?GamePenalty

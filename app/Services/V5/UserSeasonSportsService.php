@@ -9,11 +9,8 @@ use Exception;
 
 class UserSeasonSportsService
 {
-    protected UserSeasonSportRepository $userSeasonSportRepository;
-
-    public function __construct(UserSeasonSportRepository $userSeasonSportRepository)
+    public function __construct(protected UserSeasonSportRepository $userSeasonSportRepository)
     {
-        $this->userSeasonSportRepository = $userSeasonSportRepository;
     }
 
     public function findOne(array $condition): ?UserSeasonSport
@@ -54,7 +51,7 @@ class UserSeasonSportsService
 
     /**
      * Create a user season sport by finding the newest season for the given sport_id.
-     * 
+     *
      * @param array $data Must contain 'user_id' and 'sport_id'
      * @return UserSeasonSport
      * @throws Exception
@@ -114,7 +111,7 @@ class UserSeasonSportsService
 
     /**
      * Get user's existing season sports and latest season sports for their sports.
-     * 
+     *
      * @param int $userId
      * @return array ['existing' => [...], 'latest' => [...]]
      */
@@ -136,7 +133,7 @@ class UserSeasonSportsService
 
         // Get latest season sport for each sport
         $latestSeasonSports = collect();
-        
+
         foreach ($sportIds as $sportId) {
             // Find the latest season_sport for this sport
             // Order by season name descending (e.g., 2026/2027 > 2025/2026)

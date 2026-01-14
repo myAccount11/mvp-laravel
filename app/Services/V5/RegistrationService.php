@@ -7,11 +7,8 @@ use App\Repositories\V5\RegistrationRepository;
 
 class RegistrationService
 {
-    protected RegistrationRepository $registrationRepository;
-
-    public function __construct(RegistrationRepository $registrationRepository)
+    public function __construct(protected RegistrationRepository $registrationRepository)
     {
-        $this->registrationRepository = $registrationRepository;
     }
 
     public function findOne(array $condition): ?Registration

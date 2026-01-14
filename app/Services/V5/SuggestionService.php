@@ -7,11 +7,8 @@ use App\Repositories\V5\SuggestionRepository;
 
 class SuggestionService
 {
-    protected SuggestionRepository $suggestionRepository;
-
-    public function __construct(SuggestionRepository $suggestionRepository)
+    public function __construct(protected SuggestionRepository $suggestionRepository)
     {
-        $this->suggestionRepository = $suggestionRepository;
     }
 
     public function findAll(array $conditions = []): \Illuminate\Database\Eloquent\Collection

@@ -7,11 +7,8 @@ use App\Repositories\V5\SeasonRepository;
 
 class SeasonService
 {
-    protected SeasonRepository $seasonRepository;
-
-    public function __construct(SeasonRepository $seasonRepository)
+    public function __construct(protected SeasonRepository $seasonRepository)
     {
-        $this->seasonRepository = $seasonRepository;
     }
 
     public function findAll(): \Illuminate\Database\Eloquent\Collection

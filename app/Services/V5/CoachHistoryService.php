@@ -7,11 +7,8 @@ use App\Repositories\V5\CoachHistoryRepository;
 
 class CoachHistoryService
 {
-    protected CoachHistoryRepository $coachHistoryRepository;
-
-    public function __construct(CoachHistoryRepository $coachHistoryRepository)
+    public function __construct(protected CoachHistoryRepository $coachHistoryRepository)
     {
-        $this->coachHistoryRepository = $coachHistoryRepository;
     }
 
     public function findOne(array $condition): ?CoachHistory

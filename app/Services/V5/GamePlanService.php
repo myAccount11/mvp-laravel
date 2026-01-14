@@ -7,11 +7,8 @@ use App\Repositories\V5\GamePlanRepository;
 
 class GamePlanService
 {
-    protected GamePlanRepository $gamePlanRepository;
-
-    public function __construct(GamePlanRepository $gamePlanRepository)
+    public function __construct(protected GamePlanRepository $gamePlanRepository)
     {
-        $this->gamePlanRepository = $gamePlanRepository;
     }
 
     public function findAll(string $orderBy = 'id', string $orderDirection = 'asc'): \Illuminate\Database\Eloquent\Collection

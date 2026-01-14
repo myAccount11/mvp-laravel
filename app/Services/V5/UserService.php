@@ -10,14 +10,11 @@ use Illuminate\Support\Facades\Log;
 
 class UserService
 {
-    protected $userRepository;
-    protected $mailService;
-
-
-    public function __construct(UserRepository $userRepository, MailService $mailService)
+    public function __construct(
+        protected UserRepository $userRepository,
+        protected MailService $mailService
+    )
     {
-        $this->userRepository = $userRepository;
-        $this->mailService = $mailService;
     }
 
     public function createUser(array $data)

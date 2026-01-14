@@ -7,11 +7,8 @@ use App\Repositories\V5\RegionRepository;
 
 class RegionsService
 {
-    protected RegionRepository $regionRepository;
-
-    public function __construct(RegionRepository $regionRepository)
+    public function __construct(protected RegionRepository $regionRepository)
     {
-        $this->regionRepository = $regionRepository;
     }
 
     public function findOne(array $condition): ?Region

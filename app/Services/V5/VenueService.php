@@ -4,30 +4,19 @@ namespace App\Services\V5;
 
 use App\Models\V5\Venue;
 use App\Repositories\V5\VenueRepository;
-use App\Services\V5\ClubService;
-use App\Services\V5\CourtService;
-use App\Services\V5\TeamService;
 use App\Models\V5\VenueSeasonSport;
 use App\Models\V5\ClubVenue;
-use App\Models\V5\Court;
-use App\Models\V5\Club;
 use App\Models\V5\Team;
 
 class VenueService
 {
-    protected VenueRepository $venueRepository;
-    protected ClubService $clubService;
-    protected CourtService $courtService;
     protected ?TeamService $teamService = null;
 
     public function __construct(
-        VenueRepository $venueRepository,
-        ClubService $clubService,
-        CourtService $courtService
+        protected VenueRepository $venueRepository,
+        protected ClubService $clubService,
+        protected CourtService $courtService
     ) {
-        $this->venueRepository = $venueRepository;
-        $this->clubService = $clubService;
-        $this->courtService = $courtService;
     }
 
     protected function getTeamService(): TeamService

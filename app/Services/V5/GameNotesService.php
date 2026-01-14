@@ -7,11 +7,8 @@ use App\Repositories\V5\GameNoteRepository;
 
 class GameNotesService
 {
-    protected GameNoteRepository $gameNoteRepository;
-
-    public function __construct(GameNoteRepository $gameNoteRepository)
+    public function __construct(protected GameNoteRepository $gameNoteRepository)
     {
-        $this->gameNoteRepository = $gameNoteRepository;
     }
 
     public function findOne(array $condition): ?GameNote

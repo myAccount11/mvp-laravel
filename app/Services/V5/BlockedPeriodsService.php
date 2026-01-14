@@ -5,14 +5,12 @@ namespace App\Services\V5;
 use App\Models\V5\BlockedPeriod;
 use App\Models\V5\BlockedPeriodTournamentGroup;
 use App\Repositories\V5\BlockedPeriodRepository;
+use Illuminate\Database\Eloquent\Collection;
 
 class BlockedPeriodsService
 {
-    protected BlockedPeriodRepository $blockedPeriodRepository;
-
-    public function __construct(BlockedPeriodRepository $blockedPeriodRepository)
+    public function __construct(protected BlockedPeriodRepository $blockedPeriodRepository)
     {
-        $this->blockedPeriodRepository = $blockedPeriodRepository;
     }
 
     public function findOne(array $condition): ?BlockedPeriod
@@ -52,7 +50,7 @@ class BlockedPeriodsService
         return $query->first();
     }
 
-    public function findAll(array $condition = []): \Illuminate\Database\Eloquent\Collection
+    public function findAll(array $condition = []): Collection
     {
         return $this->blockedPeriodRepository->findBy($condition);
     }
@@ -66,7 +64,7 @@ class BlockedPeriodsService
     {
         $groups = $data['groups'] ?? [];
         unset($data['groups']);
-        
+
         $period = $this->blockedPeriodRepository->create($data);
 
         if (!($data['blockAll'] ?? false)) {

@@ -11,8 +11,6 @@ return new class extends Migration
      */
     public function up(): void
     {
-        // Note: Table already exists in database with camelCase columns
-        // This migration is for reference only
         if (!Schema::hasTable('tournament_program_items')) {
             Schema::create('tournament_program_items', function (Blueprint $table) {
                 $table->id();

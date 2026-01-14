@@ -4,24 +4,18 @@ namespace App\Services\V5;
 
 use App\Models\V5\Reservation;
 use App\Repositories\V5\ReservationRepository;
-use App\Services\V5\TimeSlotService;
-use App\Models\V5\TimeSlot;
 use Carbon\Carbon;
+use Illuminate\Database\Eloquent\Collection;
 
 class ReservationService
 {
-    protected ReservationRepository $reservationRepository;
-    protected TimeSlotService $timeSlotsService;
-
     public function __construct(
-        ReservationRepository $reservationRepository,
-        TimeSlotService $timeSlotsService
+        protected ReservationRepository $reservationRepository,
+        protected TimeSlotService $timeSlotsService
     ) {
-        $this->reservationRepository = $reservationRepository;
-        $this->timeSlotsService = $timeSlotsService;
     }
 
-    public function findAll(array $conditions = []): \Illuminate\Database\Eloquent\Collection
+    public function findAll(array $conditions = []): Collection
     {
         $query = $this->reservationRepository->query();
 
@@ -71,7 +65,7 @@ class ReservationService
         if (isset($condition['include'])) {
             $includes = [];
             $whereHasConditions = [];
-            
+
             foreach ($condition['include'] as $key => $value) {
                 if (is_string($key)) {
                     // Nested relation with constraints: 'timeSlot' => function($q) {...}
@@ -89,12 +83,12 @@ class ReservationService
                     }
                 }
             }
-            
+
             // Apply whereHas conditions first (they filter the main query)
             foreach ($whereHasConditions as $relation => $callback) {
                 $query->whereHas($relation, $callback);
             }
-            
+
             // Then eager load the relations
             if (!empty($includes)) {
                 $query->with($includes);
@@ -109,7 +103,7 @@ class ReservationService
         return $this->reservationRepository->create($data);
     }
 
-    public function bulkCreate(array $data): \Illuminate\Database\Eloquent\Collection
+    public function bulkCreate(array $data): Collection
     {
         $reservations = [];
         foreach ($data as $reservationData) {

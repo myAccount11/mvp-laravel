@@ -7,11 +7,8 @@ use App\Repositories\V5\OrganizerRepository;
 
 class OrganizerService
 {
-    protected OrganizerRepository $organizerRepository;
-
-    public function __construct(OrganizerRepository $organizerRepository)
+    public function __construct(protected OrganizerRepository $organizerRepository)
     {
-        $this->organizerRepository = $organizerRepository;
     }
 
     public function findAll(string $orderBy = 'id', string $orderDirection = 'asc'): \Illuminate\Database\Eloquent\Collection

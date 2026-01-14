@@ -14,8 +14,6 @@ use App\Models\V5\User;
 
 class RoleService
 {
-    protected RoleRepository $roleRepository;
-    protected UserRoleRepository $userRoleRepository;
     protected ?UserService $userService = null;
     protected ?TeamService $teamService = null;
     protected ?ClubService $clubService = null;
@@ -23,11 +21,9 @@ class RoleService
     protected ?MessageService $messageService = null;
 
     public function __construct(
-        RoleRepository $roleRepository,
-        UserRoleRepository $userRoleRepository
+        protected RoleRepository $roleRepository,
+        protected UserRoleRepository $userRoleRepository
     ) {
-        $this->roleRepository = $roleRepository;
-        $this->userRoleRepository = $userRoleRepository;
     }
 
     protected function getUserService(): UserService
@@ -69,7 +65,7 @@ class RoleService
     {
         $orderBy = $conditions['order_by'] ?? 'id';
         $orderDirection = $conditions['order_direction'] ?? 'asc';
-        
+
         return $this->roleRepository->query()
             ->orderBy($orderBy, $orderDirection)
             ->get();

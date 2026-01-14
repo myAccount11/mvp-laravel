@@ -7,11 +7,8 @@ use App\Repositories\V5\GameDraftRepository;
 
 class GameDraftService
 {
-    protected GameDraftRepository $gameDraftRepository;
-
-    public function __construct(GameDraftRepository $gameDraftRepository)
+    public function __construct(protected GameDraftRepository $gameDraftRepository)
     {
-        $this->gameDraftRepository = $gameDraftRepository;
     }
 
     public function findOne(array $condition): ?GameDraft

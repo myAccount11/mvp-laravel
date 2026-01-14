@@ -20,7 +20,6 @@ class SeasonsSeeder extends Seeder
 
         foreach ($seasons as $season) {
             Season::updateOrCreate(
-                ['id' => $season['id']],
                 $season
             );
         }

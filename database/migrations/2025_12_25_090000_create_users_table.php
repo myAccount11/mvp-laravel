@@ -17,7 +17,6 @@ return new class extends Migration
             $table->string('name')->nullable();
             $table->string('picture')->nullable();
             $table->boolean('disable_emails')->default(false);
-            $table->integer('license')->default(0);
             $table->string('gender')->nullable();
             $table->integer('birth_year')->nullable();
             $table->integer('birth_month')->nullable();

@@ -9,11 +9,8 @@ use App\Models\V5\UserSeasonSport;
 
 class MessageService
 {
-    protected MessageRepository $messageRepository;
-
-    public function __construct(MessageRepository $messageRepository)
+    public function __construct(protected MessageRepository $messageRepository)
     {
-        $this->messageRepository = $messageRepository;
     }
 
     public function findAll(): \Illuminate\Database\Eloquent\Collection

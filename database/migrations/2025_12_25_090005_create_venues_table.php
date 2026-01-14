@@ -14,10 +14,15 @@ return new class extends Migration
             $table->string('address_line1')->nullable();
             $table->string('address_line2')->nullable();
             $table->string('postal_code')->nullable();
-            $table->string('city')->nullable();
+            $table->string('postal_city')->nullable();
             $table->string('country')->nullable();
             $table->string('phone_number')->nullable();
+            $table->string('web_address')->nullable();
             $table->string('email')->nullable();
+            $table->boolean('is_active')->default(true);
+            $table->string('lat_lng')->nullable();
+            $table->string('place_id')->nullable();
+            $table->string('cal_key')->nullable();
             $table->timestamps();
         });
     }

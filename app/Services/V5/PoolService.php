@@ -4,17 +4,15 @@ namespace App\Services\V5;
 
 use App\Models\V5\Pool;
 use App\Repositories\V5\PoolRepository;
+use Illuminate\Database\Eloquent\Collection;
 
 class PoolService
 {
-    protected PoolRepository $poolRepository;
-
-    public function __construct(PoolRepository $poolRepository)
+    public function __construct(protected PoolRepository $poolRepository)
     {
-        $this->poolRepository = $poolRepository;
     }
 
-    public function findAll(array $conditions = []): \Illuminate\Database\Eloquent\Collection
+    public function findAll(array $conditions = []): Collection
     {
         $query = $this->poolRepository->query();
 
@@ -35,17 +33,17 @@ class PoolService
         return $this->poolRepository->create($data);
     }
 
-    public function createMany(array $data): \Illuminate\Database\Eloquent\Collection
+    public function createMany(array $data): Collection
     {
         $pools = [];
         foreach ($data as $poolData) {
             unset($poolData['id']); // Remove id if present
             $pools[] = $this->poolRepository->create($poolData);
         }
-        return new \Illuminate\Database\Eloquent\Collection($pools);
+        return new Collection($pools);
     }
 
-    public function createOrUpdate(int $tournamentId, array $data): \Illuminate\Database\Eloquent\Collection
+    public function createOrUpdate(int $tournamentId, array $data): Collection
     {
         $existingPoolIds = collect($data)->filter(fn($pool) => !empty($pool['id']))->pluck('id')->toArray();
 
