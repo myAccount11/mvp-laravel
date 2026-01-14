@@ -44,7 +44,6 @@ use App\Repositories\V5\CourtPriorityRepository;
 use App\Repositories\V5\CoachHistoryRepository;
 use App\Repositories\V5\CoachEducationRepository;
 use App\Repositories\V5\TournamentStructureRepository;
-use App\Repositories\V5\TournamentTypeRepository;
 use App\Repositories\V5\TournamentProgramRepository;
 use App\Repositories\V5\TournamentRegistrationTypeRepository;
 
@@ -88,7 +87,6 @@ use App\Models\V5\CourtPriority;
 use App\Models\V5\CoachHistory;
 use App\Models\V5\CoachEducation;
 use App\Models\V5\TournamentStructure;
-use App\Models\V5\TournamentType;
 use App\Models\V5\TournamentProgram;
 use App\Models\V5\TournamentRegistrationType;
 
@@ -254,10 +252,6 @@ class AppServiceProvider extends ServiceProvider
 
         $this->app->bind(TournamentStructureRepository::class, function () {
             return new TournamentStructureRepository(new TournamentStructure());
-        });
-
-        $this->app->bind(TournamentTypeRepository::class, function () {
-            return new TournamentTypeRepository(new TournamentType());
         });
 
         $this->app->bind(TournamentProgramRepository::class, function () {

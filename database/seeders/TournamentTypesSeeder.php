@@ -2,9 +2,7 @@
 
 namespace Database\Seeders;
 
-use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
-use App\Models\V5\TournamentType;
 use App\Models\V5\TournamentStructure;
 use App\Models\V5\TournamentRegistrationType;
 
@@ -43,18 +41,5 @@ class TournamentTypesSeeder extends Seeder
             );
         }
 
-        // Seed tournament_types
-        $types = [
-            'Normal',
-            'Cup',
-            'Grand Prix',
-        ];
-
-        foreach ($types as $name) {
-            TournamentType::firstOrCreate(
-                ['name' => $name, 'season_sport_id' => 2],
-                ['name' => $name, 'season_sport_id' => 2]
-            );
-        }
     }
 }

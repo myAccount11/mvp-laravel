@@ -312,14 +312,6 @@ Route::middleware(['auth:sanctum'])->group(function () {
             Route::delete('/{id}', [\App\Http\Controllers\Api\V5\ReservationTypesController::class, 'destroy']);
         });
 
-        Route::prefix('tournament-types')->group(function () {
-            Route::get('/', [\App\Http\Controllers\Api\V5\TournamentTypesController::class, 'getAll']);
-            Route::post('/', [\App\Http\Controllers\Api\V5\TournamentTypesController::class, 'create']);
-            Route::get('/{id}', [\App\Http\Controllers\Api\V5\TournamentTypesController::class, 'getById']);
-            Route::put('/{id}', [\App\Http\Controllers\Api\V5\TournamentTypesController::class, 'update']);
-            Route::delete('/{id}', [\App\Http\Controllers\Api\V5\TournamentTypesController::class, 'destroy']);
-        });
-
         Route::prefix('tournament-structures')->group(function () {
             Route::get('/', [\App\Http\Controllers\Api\V5\TournamentStructuresController::class, 'getAll']);
             Route::post('/', [\App\Http\Controllers\Api\V5\TournamentStructuresController::class, 'create']);

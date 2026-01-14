@@ -88,7 +88,7 @@ class UserRepository extends BaseRepository
 
         $count = $query->count();
         $rows = $query->with('roles')
-            ->select('id', 'email', 'name', 'disable_emails', 'license', 'gender',
+            ->select('id', 'email', 'name', 'disable_emails', 'gender',
                      'birth_year', 'birth_month', 'birth_day', 'nationality',
                      'address_line1', 'address_line2', 'postal_code', 'city',
                      'country', 'phone_numbers', 'debtor_number', 'latlng', 'is_verified')
@@ -97,11 +97,6 @@ class UserRepository extends BaseRepository
             ->get();
 
         return ['rows' => $rows, 'count' => $count];
-    }
-
-    public function getLastLicense()
-    {
-        return $this->model->orderBy('license', 'desc')->value('license') ?? 0;
     }
 
     public function updateByCondition(array $condition, array $data)

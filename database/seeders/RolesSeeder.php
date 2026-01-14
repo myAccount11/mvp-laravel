@@ -37,6 +37,10 @@ class RolesSeeder extends Seeder
                 'value' => Role::PLAYER,
                 'description' => 'Player',
             ],
+            [
+                'value' => Role::ASSOCIATION_ADMIN,
+                'description' => 'Association Admin',
+            ],
         ];
 
         foreach ($roles as $role) {

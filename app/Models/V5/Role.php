@@ -20,6 +20,7 @@ class Role extends Model
     const HEAD_COACH = 'head_coach';
     const ASSISTANT_COACH = 'assistant_coach';
     const TEAM_MANAGER = 'team_manager';
+    const ASSOCIATION_ADMIN = 'association_admin';
     const PLAYER = 'player';
 
     public function users()

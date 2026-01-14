@@ -22,10 +22,8 @@ class UserService
 
     public function createUser(array $data)
     {
-        $lastLicense = $this->userRepository->getLastLicense();
         $data['password'] = Hash::make($data['password']);
         $data['email'] = strtolower($data['email']);
-        $data['license'] = $lastLicense + 1;
 
         $user = $this->userRepository->create($data);
 
@@ -38,8 +36,6 @@ class UserService
 
     public function createUserByAdmin(array $data)
     {
-        $lastLicense = $this->userRepository->getLastLicense();
-        $data['license'] = $lastLicense + 1;
         $data['email'] = strtolower($data['email']);
 
         // Handle old user registration if in production
@@ -62,8 +58,6 @@ class UserService
 
     public function createGoogleUser(array $data)
     {
-        $lastLicense = $this->userRepository->getLastLicense();
-        $data['license'] = $lastLicense + 1;
         $data['email'] = strtolower($data['email']);
 
         return $this->userRepository->create($data);
@@ -86,7 +80,7 @@ class UserService
     {
         return $this->userRepository->query()
             ->with('roles')
-            ->select('id', 'email', 'name', 'disable_emails', 'license', 'gender',
+            ->select('id', 'email', 'name', 'disable_emails', 'gender',
                      'birth_year', 'birth_month', 'birth_day', 'nationality',
                      'address_line1', 'address_line2', 'postal_code', 'city',
                      'country', 'phone_numbers', 'debtor_number', 'latlng', 'is_verified')
@@ -264,7 +258,7 @@ class UserService
                 $q->wherePivot('season_sport_id', $seasonSportId);
             },
         ])
-        ->select('id', 'email', 'name', 'disable_emails', 'license', 'gender',
+        ->select('id', 'email', 'name', 'disable_emails', 'gender',
                  'birth_year', 'birth_month', 'birth_day', 'nationality',
                  'address_line1', 'address_line2', 'postal_code', 'city',
                  'country', 'phone_numbers', 'debtor_number', 'latlng', 'is_verified')
@@ -295,7 +289,7 @@ class UserService
                 $q->wherePivot('season_sport_id', $seasonSportId)
                   ->wherePivot('user_role_approved_by_user_id', '>=', 0);
             }])
-            ->select('id', 'email', 'name', 'disable_emails', 'license', 'gender',
+            ->select('id', 'email', 'name', 'disable_emails', 'gender',
                      'birth_year', 'birth_month', 'birth_day', 'nationality',
                      'address_line1', 'address_line2', 'postal_code', 'city',
                      'country', 'phone_numbers', 'debtor_number', 'latlng', 'is_verified')

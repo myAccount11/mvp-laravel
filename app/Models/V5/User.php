@@ -19,7 +19,6 @@ class User extends Authenticatable
         'name',
         'picture',
         'disable_emails',
-        'license',
         'gender',
         'birth_year',
         'birth_month',
@@ -44,7 +43,6 @@ class User extends Authenticatable
     protected $casts = [
         'disable_emails' => 'boolean',
         'is_verified' => 'boolean',
-        'license' => 'integer',
         'birth_year' => 'integer',
         'birth_month' => 'integer',
         'birth_day' => 'integer',
