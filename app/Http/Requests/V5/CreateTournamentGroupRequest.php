@@ -37,8 +37,13 @@ class CreateTournamentGroupRequest extends FormRequest
             'end_date' => 'nullable|date',
             'set_game_strategy_id' => 'nullable|integer',
             'moving_strategy_id' => 'nullable|integer',
-            'tournament_configs_id' => 'nullable|integer',
             'league_id' => 'nullable|integer',
+            'free_reschedule_until_date' => 'nullable|date',
+            'registration_dead_line' => 'nullable|date',
+            'minimum_warmup_minutes' => 'nullable|integer',
+            'expected_duration_minutes' => 'required|integer',
+            'earliest_start' => 'nullable|string',
+            'latest_start' => 'nullable|string',
         ];
     }
 }

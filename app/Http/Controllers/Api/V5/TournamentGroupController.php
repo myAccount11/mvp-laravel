@@ -21,7 +21,7 @@ class TournamentGroupController extends Controller
     public function create(CreateTournamentGroupRequest $request): JsonResponse
     {
         $tournamentGroup = $this->tournamentGroupService->create($request->validated());
-        $tournamentGroup->load(['league', 'tournamentConfig']);
+        $tournamentGroup->load(['league']);
         return response()->json($tournamentGroup, 201);
     }
 
@@ -74,7 +74,7 @@ class TournamentGroupController extends Controller
     {
         $tournamentGroup = $this->tournamentGroupService->findOne([
             'where' => ['id' => $id],
-            'include' => ['league', 'tournamentConfig'],
+            'include' => ['league'],
         ]);
 
         if (!$tournamentGroup) {
@@ -110,7 +110,7 @@ class TournamentGroupController extends Controller
         if ($result) {
             $tournamentGroup = $this->tournamentGroupService->findOne([
                 'where' => ['id' => $id],
-                'include' => ['league', 'tournamentConfig'],
+                'include' => ['league'],
             ]);
             return response()->json($tournamentGroup);
         }

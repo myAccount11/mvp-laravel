@@ -35,7 +35,6 @@ use App\Repositories\V5\GamePenaltyRepository;
 use App\Repositories\V5\GameNoteRepository;
 use App\Repositories\V5\GameDraftRepository;
 use App\Repositories\V5\BlockedPeriodRepository;
-use App\Repositories\V5\TournamentConfigRepository;
 use App\Repositories\V5\RegionRepository;
 use App\Repositories\V5\ReservationTypeRepository;
 use App\Repositories\V5\UserSeasonSportRepository;
@@ -78,7 +77,6 @@ use App\Models\V5\GamePenalty;
 use App\Models\V5\GameNote;
 use App\Models\V5\GameDraft;
 use App\Models\V5\BlockedPeriod;
-use App\Models\V5\TournamentConfig;
 use App\Models\V5\Region;
 use App\Models\V5\ReservationType;
 use App\Models\V5\UserSeasonSport;
@@ -218,9 +216,6 @@ class AppServiceProvider extends ServiceProvider
             return new BlockedPeriodRepository(new BlockedPeriod());
         });
 
-        $this->app->bind(TournamentConfigRepository::class, function () {
-            return new TournamentConfigRepository(new TournamentConfig());
-        });
 
         $this->app->bind(RegionRepository::class, function () {
             return new RegionRepository(new Region());

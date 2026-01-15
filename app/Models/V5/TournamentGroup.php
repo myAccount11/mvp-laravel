@@ -27,8 +27,13 @@ class TournamentGroup extends Model
         'end_date',
         'set_game_strategy_id',
         'moving_strategy_id',
-        'tournament_configs_id',
         'league_id',
+        'free_reschedule_until_date',
+        'registration_dead_line',
+        'minimum_warmup_minutes',
+        'expected_duration_minutes',
+        'earliest_start',
+        'latest_start',
     ];
 
     protected $casts = [
@@ -42,8 +47,11 @@ class TournamentGroup extends Model
         'end_date' => 'datetime',
         'set_game_strategy_id' => 'integer',
         'moving_strategy_id' => 'integer',
-        'tournament_configs_id' => 'integer',
         'league_id' => 'integer',
+        'free_reschedule_until_date' => 'date',
+        'registration_dead_line' => 'date',
+        'minimum_warmup_minutes' => 'integer',
+        'expected_duration_minutes' => 'integer',
     ];
 
     public function league()
@@ -51,10 +59,6 @@ class TournamentGroup extends Model
         return $this->belongsTo(League::class, 'league_id');
     }
 
-    public function tournamentConfig()
-    {
-        return $this->belongsTo(TournamentConfig::class, 'tournament_configs_id');
-    }
 
     public function teams()
     {

@@ -21,7 +21,6 @@ class GameService
     protected ?TournamentGroupService $tournamentGroupService = null;
     protected ?ClubService $clubService = null;
     protected ?ConflictService $conflictService = null;
-    protected ?TournamentConfigsService $tournamentConfigService = null;
     protected ?TeamService $teamsService = null;
     protected ?ReservationService $reservationsService = null;
     protected ?BlockedPeriodsService $blockedPeriodsService = null;
@@ -67,11 +66,6 @@ class GameService
     protected function getConflictService(): ConflictService
     {
         return $this->conflictService ??= app(ConflictService::class);
-    }
-
-    protected function getTournamentConfigService(): TournamentConfigsService
-    {
-        return $this->tournamentConfigService ??= app(TournamentConfigsService::class);
     }
 
     protected function getTeamsService(): TeamService
@@ -1677,13 +1671,11 @@ class GameService
         ]);
 
         if ($game && $game->time && $game->court_id) {
-            $tournamentConfig = $this->getTournamentConfigService()->findOne([
-                'id' => $game->tournament->tournamentGroup->tournament_configs_id
-            ]);
+            $tournamentGroup = $game->tournament->tournamentGroup;
 
-            if ($tournamentConfig) {
-                $timeStart = Carbon::parse($game->time)->subMinutes($tournamentConfig->minimum_warmup_minutes)->format('H:i');
-                $timeEnd = Carbon::parse($game->time)->addMinutes($tournamentConfig->expected_duration_minutes)->format('H:i');
+            if ($tournamentGroup) {
+                $timeStart = Carbon::parse($game->time)->subMinutes($tournamentGroup->minimum_warmup_minutes ?? 0)->format('H:i');
+                $timeEnd = Carbon::parse($game->time)->addMinutes($tournamentGroup->expected_duration_minutes ?? 0)->format('H:i');
 
                 // Check if reservation already exists
                 $existingReservations = $this->getReservationsService()->findAll([

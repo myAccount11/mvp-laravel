@@ -25,12 +25,16 @@ return new class extends Migration
             $table->dateTime('end_date')->nullable();
             $table->integer('set_game_strategy_id')->default(0);
             $table->integer('moving_strategy_id')->nullable();
-            $table->integer('tournament_configs_id')->nullable();
             $table->integer('league_id')->nullable();
+            $table->date('free_reschedule_until_date')->nullable();
+            $table->date('registration_dead_line')->nullable();
+            $table->integer('minimum_warmup_minutes')->default(0);
+            $table->integer('expected_duration_minutes');
+            $table->string('earliest_start')->nullable();
+            $table->string('latest_start')->nullable();
             $table->timestamps();
             
             $table->foreign('region_id')->references('id')->on('regions')->onDelete('set null');
-            $table->foreign('tournament_configs_id')->references('id')->on('tournament_configs')->onDelete('set null');
         });
     }
 

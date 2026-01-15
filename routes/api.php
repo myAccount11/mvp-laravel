@@ -355,14 +355,6 @@ Route::middleware(['auth:sanctum'])->group(function () {
             Route::delete('/{id}', [\App\Http\Controllers\Api\V5\TournamentGroupController::class, 'destroy']);
         });
 
-        Route::prefix('tournament-configs')->group(function () {
-            Route::get('/', [\App\Http\Controllers\Api\V5\TournamentConfigsController::class, 'getAll']);
-            Route::get('/names', [\App\Http\Controllers\Api\V5\TournamentConfigsController::class, 'getNames']);
-            Route::post('/', [\App\Http\Controllers\Api\V5\TournamentConfigsController::class, 'create']);
-            Route::get('/{id}', [\App\Http\Controllers\Api\V5\TournamentConfigsController::class, 'getById']);
-            Route::put('/{id}', [\App\Http\Controllers\Api\V5\TournamentConfigsController::class, 'update']);
-            Route::delete('/{id}', [\App\Http\Controllers\Api\V5\TournamentConfigsController::class, 'destroy']);
-        });
 
         Route::prefix('court-priorities')->group(function () {
             Route::get('/{id}', [\App\Http\Controllers\Api\V5\CourtPriorityController::class, 'getById']);
