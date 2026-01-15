@@ -14,6 +14,7 @@ return new class extends Migration
         Schema::create('tournament_structures', function (Blueprint $table) {
             $table->id();
             $table->string('name');
+            $table->string('value');
         });
     }
 

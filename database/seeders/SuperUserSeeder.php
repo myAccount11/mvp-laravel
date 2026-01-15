@@ -3,6 +3,7 @@
 namespace Database\Seeders;
 
 use App\Models\V5\Role;
+use App\Models\V5\Season;
 use App\Models\V5\User;
 use App\Models\V5\UserRole;
 use App\Models\V5\SeasonSport;
@@ -20,8 +21,9 @@ class SuperUserSeeder extends Seeder
         $user = User::updateOrCreate(
             ['email' => 'mvpadmin@admin.com'],
             [
-                'email' => 'mvpadmin@admin.com',
-                'password' => Hash::make('mvpadmin123'),
+                'email'       => 'mvpadmin@admin.com',
+                'is_verified' => true,
+                'password'    => Hash::make('mvpadmin123'),
             ]
         );
         $superAdminRole = Role::query()->where('value', 'super_admin')->first();
@@ -32,18 +34,18 @@ class SuperUserSeeder extends Seeder
                 'role_id' => $superAdminRole->id,
             ],
             [
-                'user_id' => $user->id,
-                'role_id' => $superAdminRole->id,
+                'user_id'                       => $user->id,
+                'role_id'                       => $superAdminRole->id,
                 'user_role_approved_by_user_id' => 1,
-                'club_id' => null,
-                'team_id' => null,
-                'season_sport_id' => null,
-                'user_role_spec' => '',
+                'club_id'                       => null,
+                'team_id'                       => null,
+                'season_sport_id'               => null,
+                'user_role_spec'                => '',
             ]
         );
 
         // Attach user to latest season sports (from the latest season)
-        $latestSeason = \App\Models\V5\Season::orderBy('id', 'desc')->first();
+        $latestSeason = Season::orderBy('id', 'desc')->first();
 
         if ($latestSeason) {
             $latestSeasonSports = SeasonSport::where('season_id', $latestSeason->id)->get();
@@ -51,13 +53,13 @@ class SuperUserSeeder extends Seeder
             foreach ($latestSeasonSports as $seasonSport) {
                 UserSeasonSport::updateOrCreate(
                     [
-                        'user_id' => $user->id,
+                        'user_id'         => $user->id,
                         'season_sport_id' => $seasonSport->id,
                     ],
                     [
-                        'user_id' => $user->id,
+                        'user_id'         => $user->id,
                         'season_sport_id' => $seasonSport->id,
-                        'is_active' => true,
+                        'is_active'       => true,
                     ]
                 );
             }

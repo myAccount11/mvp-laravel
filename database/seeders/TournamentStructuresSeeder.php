@@ -2,18 +2,17 @@
 
 namespace Database\Seeders;
 
+use App\Models\V5\TournamentRegistrationType;
 use Illuminate\Database\Seeder;
 use App\Models\V5\TournamentStructure;
-use App\Models\V5\TournamentRegistrationType;
 
-class TournamentTypesSeeder extends Seeder
+class TournamentStructuresSeeder extends Seeder
 {
     /**
      * Run the database seeds.
      */
     public function run(): void
     {
-        // Seed tournament_registration_types
         $registrationTypes = [
             'Organizer places teams',
             'Open registration',
@@ -27,19 +26,13 @@ class TournamentTypesSeeder extends Seeder
             );
         }
 
-        // Seed tournament_structures
-        $structures = [
-            'Pools with standings',
-            'Knockout',
-            'Play-offs with placement matches',
-        ];
+        $structures = TournamentStructure::getStructures();
 
-        foreach ($structures as $name) {
+        foreach ($structures as $structure) {
             TournamentStructure::firstOrCreate(
-                ['name' => $name],
-                ['name' => $name]
+                $structure,
+                $structure
             );
         }
-
     }
 }

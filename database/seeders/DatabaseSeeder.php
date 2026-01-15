@@ -23,7 +23,7 @@ class DatabaseSeeder extends Seeder
             RegionsSeeder::class,         // Depends on SeasonSportSeeder (needs season_sport_id)
             CourtRequirementsSeeder::class, // Court requirements (IDs 1-4 used by CourtService)
             TournamentProgramsSeeder::class,
-//            TournamentProgramItemsSeeder::class,
+            TournamentStructuresSeeder::class,
         ]);
     }
 }
