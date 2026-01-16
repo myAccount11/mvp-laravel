@@ -39,7 +39,7 @@ class BlockedPeriodsController extends Controller
     {
         $blockedPeriod = $this->blockedPeriodsService->findOne([
             'where' => ['id' => $id],
-            'include' => ['tournamentGroups'],
+            'include' => ['tournaments'],
         ]);
 
         if (!$blockedPeriod) {

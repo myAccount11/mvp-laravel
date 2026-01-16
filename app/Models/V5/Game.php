@@ -104,11 +104,6 @@ class Game extends Model
         return $this->belongsTo(Round::class, 'round_id');
     }
 
-    public function tournamentGroup()
-    {
-        return $this->belongsTo(TournamentGroup::class, 'group_id');
-    }
-
     public function homeTeam()
     {
         return $this->belongsTo(Team::class, 'team_id_home');

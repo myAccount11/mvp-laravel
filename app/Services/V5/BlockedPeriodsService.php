@@ -3,7 +3,7 @@
 namespace App\Services\V5;
 
 use App\Models\V5\BlockedPeriod;
-use App\Models\V5\BlockedPeriodTournamentGroup;
+use App\Models\V5\BlockedPeriodTournament;
 use App\Repositories\V5\BlockedPeriodRepository;
 use Illuminate\Database\Eloquent\Collection;
 
@@ -81,7 +81,7 @@ class BlockedPeriodsService
 
         $period = $this->blockedPeriodRepository->findOneBy([
             'where' => ['id' => $id],
-            'include' => ['tournamentGroups'],
+            'include' => ['tournaments'],
         ]);
 
         if (!$period) {
@@ -91,7 +91,7 @@ class BlockedPeriodsService
         $period->update($data);
 
         if (!($data['blockAll'] ?? false)) {
-            $existingGroups = $period->tournamentGroups
+            $existingGroups = $period->tournaments
                 ->filter(function ($group) use ($groups) {
                     return in_array($group->id, $groups);
                 })
@@ -100,8 +100,8 @@ class BlockedPeriodsService
                 })
                 ->toArray();
 
-            BlockedPeriodTournamentGroup::where('blocked_period_id', $id)
-                ->whereNotIn('tournament_group_id', $groups)
+            BlockedPeriodTournament::where('blocked_period_id', $id)
+                ->whereNotIn('tournament_id', $groups)
                 ->delete();
 
             $newGroups = array_filter($groups, function ($group) use ($existingGroups) {
@@ -110,7 +110,7 @@ class BlockedPeriodsService
 
             $this->attachToGroups($id, $newGroups);
         } else {
-            BlockedPeriodTournamentGroup::where('blocked_period_id', $id)->delete();
+            BlockedPeriodTournament::where('blocked_period_id', $id)->delete();
         }
 
         return true;
@@ -121,11 +121,11 @@ class BlockedPeriodsService
         $data = array_map(function ($group) use ($id) {
             return [
                 'blocked_period_id' => $id,
-                'tournament_group_id' => $group,
+                'tournament_id' => $group,
             ];
         }, $groups);
 
-        BlockedPeriodTournamentGroup::insert($data);
+        BlockedPeriodTournament::insert($data);
     }
 
     public function delete(int $id): bool

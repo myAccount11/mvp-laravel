@@ -22,7 +22,7 @@ return new class extends Migration
             $table->foreignId('team_id_away')->nullable()->constrained('teams')->onDelete('set null');
             $table->foreignId('tournament_id')->nullable()->constrained('tournaments')->onDelete('set null');
             $table->foreignId('pool_id')->nullable()->constrained('pools')->onDelete('set null');
-            $table->foreignId('group_id')->nullable()->constrained('tournament_groups')->onDelete('set null');
+            $table->foreignId('group_id')->nullable()->constrained('tournaments')->onDelete('set null');
             $table->boolean('is_deleted')->default(false);
             $table->date('last_official_date')->nullable();
             $table->time('last_official_time')->nullable();

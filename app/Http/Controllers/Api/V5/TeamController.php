@@ -60,18 +60,18 @@ class TeamController extends Controller
         return response()->json($teams);
     }
 
-    public function attachGroups($id, Request $request): JsonResponse
+    public function attachTournaments($id, Request $request): JsonResponse
     {
         // Accept both snake_case and camelCase, and also accept just an array directly
-        $groups = $request->input('tournament_groups',
-            $request->input('tournamentGroups',
-                is_array($request->all()) && !$request->has('tournament_groups') && !$request->has('tournamentGroups')
+        $tournaments = $request->input('tournaments',
+            $request->input('tournamentIds',
+                is_array($request->all()) && !$request->has('tournaments') && !$request->has('tournamentIds')
                     ? $request->all()
                     : []
             )
         );
-        $this->getTeamService()->attachGroups($id, $groups);
-        return response()->json(['message' => 'Groups attached']);
+        $this->getTeamService()->attachTournaments($id, $tournaments);
+        return response()->json(['message' => 'Tournaments attached']);
     }
 
     public function removeTeamFromTournament($teamTournamentId): JsonResponse
@@ -102,7 +102,7 @@ class TeamController extends Controller
     {
         $team = $this->getTeamService()->findOne([
             'where' => ['id' => $id],
-            'include' => ['tournamentGroups', 'tournaments'],
+            'include' => ['tournaments'],
         ]);
 
         if (!$team) {

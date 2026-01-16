@@ -24,7 +24,6 @@ use App\Repositories\V5\TournamentRepository;
 use App\Repositories\V5\PoolRepository;
 use App\Repositories\V5\RoundRepository;
 use App\Repositories\V5\LeagueRepository;
-use App\Repositories\V5\TournamentGroupRepository;
 use App\Repositories\V5\SystemRepository;
 use App\Repositories\V5\SeasonSportRepository;
 use App\Repositories\V5\PlayerLicenseRepository;
@@ -66,7 +65,6 @@ use App\Models\V5\Tournament;
 use App\Models\V5\Pool;
 use App\Models\V5\Round;
 use App\Models\V5\League;
-use App\Models\V5\TournamentGroup;
 use App\Models\V5\System;
 use App\Models\V5\SeasonSport;
 use App\Models\V5\PlayerLicense;
@@ -172,9 +170,6 @@ class AppServiceProvider extends ServiceProvider
             return new LeagueRepository(new League());
         });
 
-        $this->app->bind(TournamentGroupRepository::class, function () {
-            return new TournamentGroupRepository(new TournamentGroup());
-        });
 
         $this->app->bind(SystemRepository::class, function () {
             return new SystemRepository(new System());

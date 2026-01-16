@@ -14,9 +14,9 @@ class TournamentRegistrationType extends Model
         'name',
     ];
 
-    public function tournamentGroups()
+    public function tournaments()
     {
-        return $this->hasMany(TournamentGroup::class, 'tournament_registration_type_id');
+        return $this->hasMany(Tournament::class, 'tournament_registration_type_id');
     }
 }
 

@@ -16,20 +16,20 @@ class Registration extends Model
     protected $fillable = [
         'count',
         'level',
-        'tournament_group_id',
+        'tournament_id',
         'club_id',
     ];
 
     protected $casts = [
         'count' => 'integer',
         'level' => 'integer',
-        'tournament_group_id' => 'integer',
+        'tournament_id' => 'integer',
         'club_id' => 'integer',
     ];
 
-    public function tournamentGroup()
+    public function tournament()
     {
-        return $this->belongsTo(TournamentGroup::class, 'tournament_group_id');
+        return $this->belongsTo(Tournament::class, 'tournament_id');
     }
 
     public function club()

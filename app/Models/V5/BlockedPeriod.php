@@ -36,14 +36,14 @@ class BlockedPeriod extends Model
         return $this->belongsTo(SeasonSport::class, 'season_sport_id');
     }
 
-    public function tournamentGroups()
+    public function tournaments()
     {
-        return $this->belongsToMany(TournamentGroup::class, 'blocked_periods_tournament_groups', 'blocked_period_id', 'tournament_group_id');
+        return $this->belongsToMany(Tournament::class, 'blocked_periods_tournaments', 'blocked_period_id', 'tournament_id');
     }
 
-    public function blockedTournamentGroups()
+    public function blockedTournaments()
     {
-        return $this->hasMany(BlockedPeriodTournamentGroup::class, 'blocked_period_id');
+        return $this->hasMany(BlockedPeriodTournament::class, 'blocked_period_id');
     }
 }
 

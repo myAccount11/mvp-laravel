@@ -140,7 +140,7 @@ class CalendarService
                 }
             })
             ->with([
-                'tournament.tournamentGroup',
+                'tournament',
                 'homeTeam',
                 'guestTeam',
             ])
@@ -149,8 +149,8 @@ class CalendarService
             ->get();
 
         foreach ($games as $game) {
-            $warmupMinutes = $game->tournament->tournamentGroup->minimum_warmup_minutes ?? 0;
-            $expectedDuration = $game->tournament->tournamentGroup->expected_duration_minutes ?? 90;
+            $warmupMinutes = $game->tournament->minimum_warmup_minutes ?? 0;
+            $expectedDuration = $game->tournament->expected_duration_minutes ?? 90;
 
             // Game start is time minus warmup (subtract negative = add)
             $gameStart = Carbon::parse($game->time)->subMinutes(-$warmupMinutes)->format('H:i');
@@ -217,7 +217,7 @@ class CalendarService
                             ->where('status_id', '>', 0)
                             ->where('is_deleted', false)
                             ->with([
-                                'tournament.tournamentGroup',
+                                'tournament',
                                 'homeTeam',
                                 'guestTeam',
                             ]);
@@ -229,8 +229,8 @@ class CalendarService
 
             foreach ($suggestions as $suggestion) {
                 if ($suggestion->game) {
-                    $warmupMinutes = $suggestion->game->tournament->tournamentGroup->minimum_warmup_minutes ?? 0;
-                    $expectedDuration = $suggestion->game->tournament->tournamentGroup->expected_duration_minutes ?? 90;
+                    $warmupMinutes = $suggestion->game->tournament->minimum_warmup_minutes ?? 0;
+                    $expectedDuration = $suggestion->game->tournament->expected_duration_minutes ?? 90;
 
                     // Game start is time minus warmup (subtract negative = add)
                     $gameStart = Carbon::parse($suggestion->time)->subMinutes(-$warmupMinutes)->format('H:i');

@@ -162,33 +162,46 @@ class TeamService
         return $this->teamRepository->delete($id);
     }
 
-    public function attachGroups($id, array $groups)
+    public function attachTournaments($id, array $tournamentIds)
     {
-        DB::table('team_tournament_groups')
+        // Remove teams from tournaments not in the list
+        DB::table('team_tournaments')
             ->where('team_id', $id)
-            ->whereNotIn('tournament_group_id', $groups)
+            ->whereNotIn('tournament_id', $tournamentIds)
             ->delete();
 
-        $existing = DB::table('team_tournament_groups')
+        // Get existing tournament assignments
+        $existing = DB::table('team_tournaments')
             ->where('team_id', $id)
-            ->whereIn('tournament_group_id', $groups)
-            ->pluck('tournament_group_id')
+            ->whereIn('tournament_id', $tournamentIds)
+            ->pluck('tournament_id')
             ->toArray();
 
-        $newGroups = array_diff($groups, $existing);
+        // Add teams to new tournaments
+        $newTournaments = array_diff($tournamentIds, $existing);
         $data = [];
-        foreach ($newGroups as $groupId) {
+        foreach ($newTournaments as $tournamentId) {
             $data[] = [
                 'team_id' => $id,
-                'tournament_group_id' => $groupId,
+                'tournament_id' => $tournamentId,
+                'pool_id' => null,
+                'pool_key' => null,
+                'start_points' => null,
+                'is_deleted' => false,
             ];
         }
 
         if (count($data) > 0) {
-            DB::table('team_tournament_groups')->insert($data);
+            DB::table('team_tournaments')->insert($data);
         }
 
         return true;
+    }
+
+    // Alias for backward compatibility
+    public function attachGroups($id, array $groups)
+    {
+        return $this->attachTournaments($id, $groups);
     }
 
     public function attachTournament($id, $tournamentId, array $data = [])

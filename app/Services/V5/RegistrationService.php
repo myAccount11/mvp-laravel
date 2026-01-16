@@ -23,12 +23,12 @@ class RegistrationService
         $page = $conditions['page'] ?? 1;
         $limit = $conditions['limit'] ?? 20;
         $searchTerm = $conditions['searchTerm'] ?? null;
-        $tournamentGroupId = $conditions['tournamentGroupId'] ?? null;
+        $tournamentId = $conditions['tournamentId'] ?? null;
 
         $searchConditions = [];
 
-        if ($tournamentGroupId) {
-            $searchConditions['tournament_group_id'] = $tournamentGroupId;
+        if ($tournamentId) {
+            $searchConditions['tournament_id'] = $tournamentId;
         }
 
         if ($searchTerm) {
@@ -57,14 +57,14 @@ class RegistrationService
     public function saveRegistration(array $data): Registration|string
     {
         $clubId = $data['clubId'] ?? null;
-        $tournamentGroupId = $data['tournamentGroupId'] ?? null;
+        $tournamentId = $data['tournamentId'] ?? null;
         $level = $data['level'] ?? null;
         $count = $data['count'] ?? null;
 
         $existingRegistration = $this->registrationRepository->findOneBy([
             'where' => [
                 'club_id' => $clubId,
-                'tournament_group_id' => $tournamentGroupId,
+                'tournament_id' => $tournamentId,
                 'level' => $level,
             ],
         ]);
@@ -80,7 +80,7 @@ class RegistrationService
         } else {
             return $this->registrationRepository->create([
                 'club_id' => $clubId,
-                'tournament_group_id' => $tournamentGroupId,
+                'tournament_id' => $tournamentId,
                 'level' => $level,
                 'count' => $count,
             ]);
@@ -93,14 +93,14 @@ class RegistrationService
 
         foreach ($bulkData as $data) {
             $clubId = $data['clubId'] ?? null;
-            $tournamentGroupId = $data['tournamentGroupId'] ?? null;
+            $tournamentId = $data['tournamentId'] ?? null;
             $level = $data['level'] ?? null;
             $count = $data['count'] ?? null;
 
             $existingRegistration = $this->registrationRepository->findOneBy([
                 'where' => [
                     'club_id' => $clubId,
-                    'tournament_group_id' => $tournamentGroupId,
+                    'tournament_id' => $tournamentId,
                     'level' => $level,
                 ],
             ]);
@@ -149,7 +149,7 @@ class RegistrationService
                 if ($count > 0) {
                     $this->registrationRepository->create([
                         'club_id' => $clubId,
-                        'tournament_group_id' => $tournamentGroupId,
+                        'tournament_id' => $tournamentId,
                         'level' => $level,
                         'count' => $count,
                     ]);

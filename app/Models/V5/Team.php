@@ -56,10 +56,6 @@ class Team extends Model
         return $this->hasMany(TeamSeasonSport::class, 'team_id');
     }
 
-    public function tournamentGroups()
-    {
-        return $this->belongsToMany(TournamentGroup::class, 'team_tournament_groups', 'team_id', 'tournament_group_id');
-    }
 
     public function tournaments()
     {

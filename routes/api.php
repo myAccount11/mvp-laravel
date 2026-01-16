@@ -74,7 +74,7 @@ Route::middleware(['auth:sanctum'])->group(function () {
             Route::get('/{id}/users', [\App\Http\Controllers\Api\V5\TeamController::class, 'getTeamUsers']);
             Route::put('/{id}', [\App\Http\Controllers\Api\V5\TeamController::class, 'update']);
             Route::delete('/{id}', [\App\Http\Controllers\Api\V5\TeamController::class, 'destroy']);
-            Route::post('/{id}/attach-groups', [\App\Http\Controllers\Api\V5\TeamController::class, 'attachGroups']);
+            Route::post('/{id}/attach-tournaments', [\App\Http\Controllers\Api\V5\TeamController::class, 'attachTournaments']);
             Route::post('/{id}/attach-tournament/{tournamentId}', [\App\Http\Controllers\Api\V5\TeamController::class, 'attachTournament']);
             Route::delete('/tournaments/{teamTournamentId}', [\App\Http\Controllers\Api\V5\TeamController::class, 'removeTeamFromTournament']);
             Route::post('/{id}/add-user', [\App\Http\Controllers\Api\V5\TeamController::class, 'addUserToTeam']);
@@ -179,8 +179,10 @@ Route::middleware(['auth:sanctum'])->group(function () {
 
         Route::prefix('tournaments')->group(function () {
             Route::get('/', [\App\Http\Controllers\Api\V5\TournamentController::class, 'getAll']);
+            Route::get('/names', [\App\Http\Controllers\Api\V5\TournamentController::class, 'getNames']);
             Route::post('/', [\App\Http\Controllers\Api\V5\TournamentController::class, 'create']);
             Route::get('/{id}', [\App\Http\Controllers\Api\V5\TournamentController::class, 'getById']);
+            Route::get('/{id}/teams', [\App\Http\Controllers\Api\V5\TournamentController::class, 'getTeamsByTournamentId']);
             Route::get('/{id}/possible-teams', [\App\Http\Controllers\Api\V5\TournamentController::class, 'getPossibleTeamsForTournament']);
             Route::put('/{id}', [\App\Http\Controllers\Api\V5\TournamentController::class, 'update']);
             Route::delete('/{id}', [\App\Http\Controllers\Api\V5\TournamentController::class, 'destroy']);
@@ -344,16 +346,6 @@ Route::middleware(['auth:sanctum'])->group(function () {
             Route::delete('/{id}', [\App\Http\Controllers\Api\V5\TournamentProgramItemsController::class, 'destroy']);
         });
 
-        Route::prefix('tournament-group')->group(function () {
-            Route::get('/', [\App\Http\Controllers\Api\V5\TournamentGroupController::class, 'getAll']);
-            Route::get('/names', [\App\Http\Controllers\Api\V5\TournamentGroupController::class, 'getNames']);
-            Route::post('/', [\App\Http\Controllers\Api\V5\TournamentGroupController::class, 'create']);
-            Route::get('/{id}', [\App\Http\Controllers\Api\V5\TournamentGroupController::class, 'getById']);
-            Route::get('/{id}/teams', [\App\Http\Controllers\Api\V5\TournamentGroupController::class, 'getTeamsByGroupId']);
-            Route::get('/{id}/possible-teams', [\App\Http\Controllers\Api\V5\TournamentGroupController::class, 'getPossibleTeamsForGroup']);
-            Route::put('/{id}', [\App\Http\Controllers\Api\V5\TournamentGroupController::class, 'update']);
-            Route::delete('/{id}', [\App\Http\Controllers\Api\V5\TournamentGroupController::class, 'destroy']);
-        });
 
 
         Route::prefix('court-priorities')->group(function () {

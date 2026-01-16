@@ -6,7 +6,7 @@ use App\Models\V5\Coach;
 use App\Repositories\V5\CoachRepository;
 use App\Services\V5\UserService;
 use App\Services\V5\PersonService;
-use App\Services\V5\TournamentGroupService;
+use App\Services\V5\TournamentService;
 use App\Services\V5\TeamService;
 use App\Services\V5\CoachLicenseService;
 use App\Services\MailService;
@@ -14,7 +14,7 @@ use App\Models\V5\Person;
 use App\Models\V5\User;
 use App\Models\V5\UserRole;
 use App\Models\V5\Team;
-use App\Models\V5\TournamentGroup;
+use App\Models\V5\Tournament;
 use App\Models\V5\Club;
 use App\Models\V5\CoachEducation;
 use App\Models\V5\CoachHistory;
@@ -25,7 +25,7 @@ class CoachService
         protected CoachRepository        $coachRepository,
         protected UserService            $userService,
         protected PersonService          $personService,
-        protected TournamentGroupService $tournamentGroupService,
+        protected TournamentService $tournamentService,
         protected TeamService            $teamService,
         protected CoachLicenseService    $coachLicenseService,
         protected MailService            $mailService
@@ -40,20 +40,20 @@ class CoachService
         $page = $queryParams['page'] ?? 1;
         $limit = $queryParams['limit'] ?? 20;
         $searchTerm = $queryParams['searchTerm'] ?? null;
-        $tournamentGroupId = $queryParams['tournamentGroupId'] ?? null;
+        $tournamentId = $queryParams['tournamentId'] ?? $queryParams['tournamentGroupId'] ?? null;
         $ageGroup = $queryParams['ageGroup'] ?? null;
 
         $personConditions = [];
         $coachConditions = [];
         $coachIds = [];
 
-        if ($tournamentGroupId || $ageGroup) {
+        if ($tournamentId || $ageGroup) {
             $teamIds = [];
 
-            if ($tournamentGroupId) {
-                $tournamentGroup = $this->tournamentGroupService->findOne(['id' => $tournamentGroupId]);
-                if ($tournamentGroup) {
-                    $teamIds = $tournamentGroup->teams->pluck('id')->toArray();
+            if ($tournamentId) {
+                $tournament = $this->tournamentService->findOne(['id' => $tournamentId]);
+                if ($tournament) {
+                    $teamIds = $tournament->teams->pluck('id')->toArray();
                 }
             }
 
@@ -64,7 +64,7 @@ class CoachService
                 }
 
                 $teamsByAgeGroupIds = $teamsByAgeGroup->pluck('id')->toArray();
-                $teamIds = $tournamentGroupId
+                $teamIds = $tournamentId
                     ? array_intersect($teamIds, $teamsByAgeGroupIds)
                     : $teamsByAgeGroupIds;
             }
@@ -117,7 +117,7 @@ class CoachService
                         }
                     }
                 }
-                $q->with(['user.userRoles.team.tournamentGroup', 'user.userRoles.team.club', 'user.userRoles.club', 'user.userRoles.role']);
+                $q->with(['user.userRoles.team.tournaments', 'user.userRoles.team.club', 'user.userRoles.club', 'user.userRoles.role']);
             },
             'coachEducation',
             'coachHistories'

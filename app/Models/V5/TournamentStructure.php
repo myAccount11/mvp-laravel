@@ -39,9 +39,9 @@ class TournamentStructure extends Model
         ];
     }
 
-    public function tournamentGroups()
+    public function tournaments()
     {
-        return $this->hasMany(TournamentGroup::class, 'tournament_structure_id');
+        return $this->hasMany(Tournament::class, 'tournament_structure_id');
     }
 }
 

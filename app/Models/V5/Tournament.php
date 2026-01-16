@@ -11,11 +11,12 @@ class Tournament extends Model
 
     protected $table = 'tournaments';
 
-    public $timestamps = false;
-
     protected $fillable = [
-        'alias',
+        'name',
         'short_name',
+        'gender',
+        'age_group',
+        'is_active',
         'region_id',
         'start_date',
         'end_date',
@@ -25,25 +26,46 @@ class Tournament extends Model
         'cross_standing_group_game_count',
         'round_type',
         'information',
-        'tournament_group_id',
         'team_count',
         'deleted',
         'tournament_program_id',
+        'tournament_structure_id',
+        'tournament_registration_type_id',
+        'set_game_strategy_id',
+        'moving_strategy_id',
+        'league_id',
+        'free_reschedule_until_date',
+        'registration_dead_line',
+        'minimum_warmup_minutes',
+        'expected_duration_minutes',
+        'earliest_start',
+        'latest_start',
+        'season_sport_id',
     ];
 
     protected $casts = [
-        'start_date' => 'date',
-        'end_date' => 'date',
+        'is_active' => 'boolean',
+        'start_date' => 'datetime',
+        'end_date' => 'datetime',
         'pool_count' => 'integer',
         'standing_group_count' => 'integer',
         'cross_pool_game_count' => 'integer',
         'cross_standing_group_game_count' => 'integer',
         'round_type' => 'integer',
-        'tournament_group_id' => 'integer',
         'team_count' => 'integer',
         'deleted' => 'boolean',
         'tournament_program_id' => 'integer',
         'region_id' => 'integer',
+        'tournament_structure_id' => 'integer',
+        'tournament_registration_type_id' => 'integer',
+        'set_game_strategy_id' => 'integer',
+        'moving_strategy_id' => 'integer',
+        'league_id' => 'integer',
+        'free_reschedule_until_date' => 'date',
+        'registration_dead_line' => 'date',
+        'minimum_warmup_minutes' => 'integer',
+        'expected_duration_minutes' => 'integer',
+        'season_sport_id' => 'integer',
     ];
 
     public function region()
@@ -51,9 +73,42 @@ class Tournament extends Model
         return $this->belongsTo(Region::class, 'region_id');
     }
 
-    public function tournamentGroup()
+    public function league()
     {
-        return $this->belongsTo(TournamentGroup::class, 'tournament_group_id');
+        return $this->belongsTo(League::class, 'league_id');
+    }
+
+    public function tournamentStructure()
+    {
+        return $this->belongsTo(TournamentStructure::class, 'tournament_structure_id');
+    }
+
+    public function tournamentRegistrationType()
+    {
+        return $this->belongsTo(TournamentRegistrationType::class, 'tournament_registration_type_id');
+    }
+
+    public function registrations()
+    {
+        return $this->hasMany(Registration::class, 'tournament_id');
+    }
+
+    public function games()
+    {
+        return $this->hasMany(Game::class, 'tournament_id');
+    }
+
+    /**
+     * Set the region_id attribute, converting 0 to null
+     */
+    public function setRegionIdAttribute($value)
+    {
+        // Convert 0, '0', or empty string to null
+        if ($value == 0 || $value === '0' || $value === '') {
+            $this->attributes['region_id'] = null;
+        } else {
+            $this->attributes['region_id'] = $value;
+        }
     }
 
     public function pools()
@@ -76,4 +131,5 @@ class Tournament extends Model
     {
         return $this->hasMany(TeamTournament::class, 'tournament_id');
     }
+
 }

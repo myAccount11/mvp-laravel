@@ -18,7 +18,6 @@ class GameService
     protected ?GameDraftService $gameDraftService = null;
     protected ?CourtService $courtService = null;
     protected ?TimeSlotService $timeSlotService = null;
-    protected ?TournamentGroupService $tournamentGroupService = null;
     protected ?ClubService $clubService = null;
     protected ?ConflictService $conflictService = null;
     protected ?TeamService $teamsService = null;
@@ -53,10 +52,6 @@ class GameService
         return $this->timeSlotService ??= app(TimeSlotService::class);
     }
 
-    protected function getTournamentGroupService(): TournamentGroupService
-    {
-        return $this->tournamentGroupService ??= app(TournamentGroupService::class);
-    }
 
     protected function getClubService(): ClubService
     {
@@ -561,7 +556,7 @@ class GameService
         $page = $queryParams['page'] ?? 1;
         $limit = $queryParams['limit'] ?? 20;
         $searchTerm = $queryParams['search_term'] ?? null;
-        $tournamentGroupId = $queryParams['tournament_group_id'] ?? null;
+        $tournamentId = $queryParams['tournament_id'] ?? $queryParams['tournament_group_id'] ?? null;
         $clubId = $queryParams['club_id'] ?? null;
         $teamId = $queryParams['team_id'] ?? null;
         $venueId = $queryParams['venue_id'] ?? null;
@@ -576,19 +571,11 @@ class GameService
 
         $query->where('season_sport_id', $seasonSportId);
 
-        if ($tournamentGroupId) {
-            $tournamentGroup = $this->getTournamentGroupService()->findOne([
-                'where'   => ['id' => $tournamentGroupId],
-                'include' => ['games', 'tournaments'],
-            ]);
-
-            if ($tournamentGroup) {
-                $tournamentIds = $tournamentGroup->tournaments->pluck('id')->toArray();
-                $query->where(function ($q) use ($tournamentGroupId, $tournamentIds) {
-                    $q->where('group_id', $tournamentGroupId)
-                        ->orWhereIn('tournament_id', $tournamentIds);
-                });
-            }
+        if ($tournamentId) {
+            $query->where(function ($q) use ($tournamentId) {
+                $q->where('group_id', $tournamentId)
+                    ->orWhere('tournament_id', $tournamentId);
+            });
         }
 
         if ($clubId) {
@@ -1018,7 +1005,7 @@ class GameService
         $page = $queryParams['page'] ?? 1;
         $limit = $queryParams['limit'] ?? 20;
         $searchTerm = $queryParams['search_term'] ?? null;
-        $tournamentGroupId = $queryParams['tournament_group_id'] ?? null;
+        $tournamentId = $queryParams['tournament_id'] ?? $queryParams['tournament_group_id'] ?? null;
         $clubId = $queryParams['club_id'] ?? null;
         $penaltyStatusId = $queryParams['penalty_status_id'] ?? null;
 
@@ -1032,7 +1019,7 @@ class GameService
             }
         }
 
-        $searchConditions = $this->generateSearchConditions([], $clubId, $tournamentGroupId, $searchTerm);
+        $searchConditions = $this->generateSearchConditions([], $clubId, $tournamentId, $searchTerm);
         foreach ($searchConditions as $condition) {
             $query->where($condition[0], $condition[1], $condition[2] ?? null);
         }
@@ -1073,7 +1060,7 @@ class GameService
         $page = $queryParams['page'] ?? 1;
         $limit = $queryParams['limit'] ?? 20;
         $searchTerm = $queryParams['searchTerm'] ?? null;
-        $tournamentGroupId = $queryParams['tournamentGroupId'] ?? null;
+        $tournamentId = $queryParams['tournamentId'] ?? $queryParams['tournamentGroupId'] ?? null;
         $clubId = $queryParams['clubId'] ?? null;
         $penaltyStatusId = $queryParams['penaltyStatusId'] ?? null;
 
@@ -1087,7 +1074,7 @@ class GameService
             }
         }
 
-        $searchConditions = $this->generateSearchConditions([], $clubId, $tournamentGroupId, $searchTerm);
+        $searchConditions = $this->generateSearchConditions([], $clubId, $tournamentId, $searchTerm);
         foreach ($searchConditions as $condition) {
             $query->where($condition[0], $condition[1], $condition[2] ?? null);
         }
@@ -1132,7 +1119,7 @@ class GameService
     protected function generateSearchConditions(
         array   $searchConditions,
         ?int    $clubId,
-        ?int    $tournamentGroupId,
+        ?int    $tournamentId,
         ?string $searchTerm
     ): array
     {
@@ -1152,21 +1139,13 @@ class GameService
             $conditions[] = ['number', '=', $searchTerm];
         }
 
-        if ($tournamentGroupId) {
-            $tournamentGroup = $this->getTournamentGroupService()->findOne([
-                'where'   => ['id' => $tournamentGroupId],
-                'include' => ['games', 'tournaments'],
-            ]);
-
-            if ($tournamentGroup) {
-                $tournamentIds = $tournamentGroup->tournaments->pluck('id')->toArray();
-                $conditions[] = [
-                    function ($q) use ($tournamentGroupId, $tournamentIds) {
-                        $q->where('group_id', $tournamentGroupId)
-                            ->orWhereIn('tournament_id', $tournamentIds);
-                    },
-                ];
-            }
+        if ($tournamentId) {
+            $conditions[] = [
+                function ($q) use ($tournamentId) {
+                    $q->where('group_id', $tournamentId)
+                        ->orWhere('tournament_id', $tournamentId);
+                },
+            ];
         }
 
         return $conditions;
@@ -1264,15 +1243,15 @@ class GameService
                 'where'   => [
                     function ($q) use ($game) {
                         $q->where('block_all', true)
-                            ->orWhereHas('tournamentGroups', function ($subQ) use ($game) {
-                                $subQ->where('tournament_groups.id', $game->tournament->tournament_group_id);
+                            ->orWhereHas('tournaments', function ($subQ) use ($game) {
+                                $subQ->where('tournaments.id', $game->tournament_id);
                             });
                     },
                     ['start_date', '<=', $gameDate->format('Y-m-d')],
                     ['end_date', '>=', $gameDate->format('Y-m-d')],
                     ['season_sport_id', '=', $game->season_sport_id],
                 ],
-                'include' => ['tournamentGroups'],
+                'include' => ['tournaments'],
             ]);
 
             if ($blockedPeriod) {
@@ -1667,15 +1646,15 @@ class GameService
 
         $game = $this->findOne([
             'where'   => ['id' => $gameId],
-            'include' => ['tournament.tournamentGroup', 'homeTeam', 'guestTeam']
+            'include' => ['tournament', 'homeTeam', 'guestTeam']
         ]);
 
         if ($game && $game->time && $game->court_id) {
-            $tournamentGroup = $game->tournament->tournamentGroup;
+            $tournament = $game->tournament;
 
-            if ($tournamentGroup) {
-                $timeStart = Carbon::parse($game->time)->subMinutes($tournamentGroup->minimum_warmup_minutes ?? 0)->format('H:i');
-                $timeEnd = Carbon::parse($game->time)->addMinutes($tournamentGroup->expected_duration_minutes ?? 0)->format('H:i');
+            if ($tournament) {
+                $timeStart = Carbon::parse($game->time)->subMinutes($tournament->minimum_warmup_minutes ?? 0)->format('H:i');
+                $timeEnd = Carbon::parse($game->time)->addMinutes($tournament->expected_duration_minutes ?? 0)->format('H:i');
 
                 // Check if reservation already exists
                 $existingReservations = $this->getReservationsService()->findAll([

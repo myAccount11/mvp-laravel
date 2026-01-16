@@ -8,7 +8,6 @@ use App\Repositories\V5\PoolRepository;
 use App\Services\V5\TeamService;
 use App\Models\V5\TeamTournament;
 use App\Models\V5\Team;
-use App\Models\V5\TournamentGroup;
 
 class TournamentService
 {
@@ -49,6 +48,21 @@ class TournamentService
         return $tournament;
     }
 
+    public function findAll(array $conditions = []): \Illuminate\Database\Eloquent\Collection
+    {
+        $query = $this->tournamentRepository->query();
+
+        if (isset($conditions['where'])) {
+            $query->where($conditions['where']);
+        }
+
+        if (isset($conditions['include'])) {
+            $query->with($conditions['include']);
+        }
+
+        return $query->get();
+    }
+
     public function create(array $data): Tournament
     {
         return $this->tournamentRepository->create($data);
@@ -77,31 +91,30 @@ class TournamentService
 
     public function getPossibleTeamsForTournament(int $id): \Illuminate\Database\Eloquent\Collection
     {
-        $tournament = $this->tournamentRepository->query()->with(['teams', 'tournamentGroup.teams'])
+        $tournament = $this->tournamentRepository->query()->with(['teams'])
             ->where('id', $id)
             ->first();
 
-        if (!$tournament || !$tournament->tournamentGroup) {
+        if (!$tournament) {
             return collect([]);
         }
 
-        $allTeams = $tournament->tournamentGroup->teams->pluck('id')->toArray();
         $existingTeams = $tournament->teams->pluck('id')->toArray();
-
-        // If no teams in tournament group, return empty collection
-        if (empty($allTeams)) {
-            return collect([]);
-        }
 
         // Build where conditions
         $whereConditions = [];
 
-        // Always filter by teams in the tournament group
-        $whereConditions[] = ['id', 'in', $allTeams];
-
         // Only exclude existing teams if there are any
         if (!empty($existingTeams)) {
             $whereConditions[] = ['id', 'not in', $existingTeams];
+        }
+
+        // If tournament has league_id, filter by league's club teams
+        if ($tournament->league_id) {
+            $league = \App\Models\V5\League::find($tournament->league_id);
+            if ($league && $league->club_id) {
+                $whereConditions[] = ['club_id', '=', $league->club_id];
+            }
         }
 
         return $this->getTeamService()->findAll([
@@ -128,9 +141,14 @@ class TournamentService
         if (isset($conditions['searchTerm'])) {
             $searchTerm = $conditions['searchTerm'];
             $query->where(function ($q) use ($searchTerm) {
-                $q->where('alias', 'ILIKE', "%{$searchTerm}%")
+                $q->where('name', 'ILIKE', "%{$searchTerm}%")
                   ->orWhere('short_name', 'ILIKE', "%{$searchTerm}%");
             });
+        }
+
+        // Handle leagueId filter
+        if (isset($conditions['leagueId']) && $conditions['leagueId'] !== null && $conditions['leagueId'] !== '') {
+            $query->where('league_id', (int)$conditions['leagueId']);
         }
 
         // Get count before adding relationships and pagination

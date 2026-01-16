@@ -21,7 +21,7 @@ class TournamentController extends Controller
     public function create(CreateTournamentRequest $request): JsonResponse
     {
         $tournament = $this->tournamentService->create($request->validated());
-        $tournament->load(['region']);
+        $tournament->load(['region', 'league']);
         return response()->json($tournament, 201);
     }
 
@@ -32,22 +32,22 @@ class TournamentController extends Controller
         $page = (int)$request->query('page', 1);
         $limit = (int)$request->query('limit', 20);
         $searchTerm = $request->query('search_term');
-        $tournamentGroupId = $request->query('tournament_group_id');
+        $leagueId = $request->query('league_id');
 
         $conditions = [
             'orderBy' => $orderBy,
             'orderDirection' => $orderDirection,
             'page' => $page,
             'limit' => $limit,
-            'include' => ['region'],
+            'include' => ['region', 'league'],
         ];
 
         if ($searchTerm) {
             $conditions['searchTerm'] = $searchTerm;
         }
 
-        if ($tournamentGroupId) {
-            $conditions['where'] = [['tournament_group_id', '=', (int)$tournamentGroupId]];
+        if ($leagueId && $leagueId !== '' && $leagueId !== '0') {
+            $conditions['leagueId'] = (int)$leagueId;
         }
 
         $result = $this->tournamentService->findAndCountAll($conditions);
@@ -56,6 +56,27 @@ class TournamentController extends Controller
             'rows' => $result['rows'],
             'count' => $result['count']
         ]);
+    }
+
+    public function getNames(Request $request): JsonResponse
+    {
+        $queryParams = $request->all();
+        $tournaments = $this->tournamentService->findAll($queryParams);
+        return response()->json($tournaments);
+    }
+
+    public function getTeamsByTournamentId(int $id): JsonResponse
+    {
+        $tournament = $this->tournamentService->findOne([
+            'where' => ['id' => $id],
+            'include' => ['teams', 'league'],
+        ]);
+
+        if (!$tournament) {
+            return response()->json(['message' => 'Tournament not found'], 404);
+        }
+
+        return response()->json($tournament);
     }
 
     public function destroy(int $id): JsonResponse
@@ -78,7 +99,7 @@ class TournamentController extends Controller
             return response()->json(['message' => 'Tournament not found'], 404);
         }
 
-        $tournament->load(['region', 'pools' => function ($q) {
+        $tournament->load(['region', 'league', 'pools' => function ($q) {
             $q->orderBy('id', 'ASC');
         }, 'rounds' => function ($q) {
             $q->orderBy('id', 'ASC');
@@ -95,7 +116,7 @@ class TournamentController extends Controller
         }
 
         $tournament = $this->tournamentService->findOne(['id' => $id]);
-        $tournament->load(['region', 'pools' => function ($q) {
+        $tournament->load(['region', 'league', 'pools' => function ($q) {
             $q->orderBy('id', 'ASC');
         }, 'rounds' => function ($q) {
             $q->orderBy('id', 'ASC');

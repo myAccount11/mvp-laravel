@@ -8,15 +8,15 @@ return new class extends Migration
 {
     public function up(): void
     {
-        Schema::create('blocked_periods_tournament_groups', function (Blueprint $table) {
+        Schema::create('blocked_periods_tournaments', function (Blueprint $table) {
             $table->id();
             $table->foreignId('blocked_period_id')->constrained('blocked_periods')->onDelete('cascade');
-            $table->foreignId('tournament_group_id')->nullable()->constrained('tournament_groups')->onDelete('set null');
+            $table->foreignId('tournament_id')->nullable()->constrained('tournaments')->onDelete('set null');
         });
     }
 
     public function down(): void
     {
-        Schema::dropIfExists('blocked_periods_tournament_groups');
+        Schema::dropIfExists('blocked_periods_tournaments');
     }
 };
