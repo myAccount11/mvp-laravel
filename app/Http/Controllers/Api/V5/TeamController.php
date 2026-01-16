@@ -84,10 +84,6 @@ class TeamController extends Controller
     {
         // Convert poolId to pool_id for database
         $data = $request->all();
-        if (isset($data['poolId'])) {
-            $data['pool_id'] = $data['poolId'];
-            unset($data['poolId']);
-        }
         $this->getTeamService()->attachTournament($id, $tournamentId, $data);
         return response()->json(['message' => 'Tournament attached']);
     }

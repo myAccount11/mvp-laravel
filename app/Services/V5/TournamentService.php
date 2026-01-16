@@ -4,10 +4,7 @@ namespace App\Services\V5;
 
 use App\Models\V5\Tournament;
 use App\Repositories\V5\TournamentRepository;
-use App\Repositories\V5\PoolRepository;
-use App\Services\V5\TeamService;
 use App\Models\V5\TeamTournament;
-use App\Models\V5\Team;
 
 class TournamentService
 {
@@ -15,7 +12,6 @@ class TournamentService
 
     public function __construct(
         protected TournamentRepository $tournamentRepository,
-        protected PoolRepository $poolRepository
     ) {
     }
 
@@ -76,9 +72,6 @@ class TournamentService
     public function delete(int $id): bool
     {
         try {
-            // Delete pools
-            $this->poolRepository->query()->where('tournament_id', $id)->delete();
-
             // Delete team tournaments
             TeamTournament::where('tournament_id', $id)->delete();
 

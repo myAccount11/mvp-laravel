@@ -16,8 +16,6 @@ class TeamTournament extends Model
     protected $fillable = [
         'team_id',
         'tournament_id',
-        'pool_id',
-        'pool_key',
         'start_points',
         'is_deleted',
     ];
@@ -25,8 +23,6 @@ class TeamTournament extends Model
     protected $casts = [
         'team_id' => 'integer',
         'tournament_id' => 'integer',
-        'pool_id' => 'integer',
-        'pool_key' => 'integer',
         'start_points' => 'integer',
         'is_deleted' => 'boolean',
     ];
@@ -34,11 +30,6 @@ class TeamTournament extends Model
     public function team()
     {
         return $this->belongsTo(Team::class, 'team_id');
-    }
-
-    public function pool()
-    {
-        return $this->belongsTo(Pool::class, 'pool_id');
     }
 
     public function tournament()

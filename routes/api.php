@@ -186,15 +186,10 @@ Route::middleware(['auth:sanctum'])->group(function () {
             Route::get('/{id}/possible-teams', [\App\Http\Controllers\Api\V5\TournamentController::class, 'getPossibleTeamsForTournament']);
             Route::put('/{id}', [\App\Http\Controllers\Api\V5\TournamentController::class, 'update']);
             Route::delete('/{id}', [\App\Http\Controllers\Api\V5\TournamentController::class, 'destroy']);
-        });
-
-        Route::prefix('pools')->group(function () {
-            Route::get('/', [\App\Http\Controllers\Api\V5\PoolController::class, 'getAll']);
-            Route::post('/', [\App\Http\Controllers\Api\V5\PoolController::class, 'createMany']);
-            Route::post('/recreate/{tournamentId}', [\App\Http\Controllers\Api\V5\PoolController::class, 'createOrUpdate']);
-            Route::get('/{id}', [\App\Http\Controllers\Api\V5\PoolController::class, 'getById']);
-            Route::put('/{id}', [\App\Http\Controllers\Api\V5\PoolController::class, 'update']);
-            Route::delete('/{id}', [\App\Http\Controllers\Api\V5\PoolController::class, 'destroy']);
+            // Tournament structure generation endpoints
+            Route::post('/{id}/generate-structure', [\App\Http\Controllers\Api\V5\TournamentController::class, 'generateStructure']);
+            Route::get('/structure/default-settings', [\App\Http\Controllers\Api\V5\TournamentController::class, 'getDefaultSettings']);
+            Route::post('/structure/validate-settings', [\App\Http\Controllers\Api\V5\TournamentController::class, 'validateStructureSettings']);
         });
 
         Route::prefix('rounds')->group(function () {

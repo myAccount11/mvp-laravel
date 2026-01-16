@@ -16,7 +16,6 @@ class GameDraft extends Model
     protected $fillable = [
         'round_id',
         'tournament_id',
-        'pool_id',
         'term_date',
         'home_key',
         'away_key',
@@ -29,7 +28,6 @@ class GameDraft extends Model
     protected $casts = [
         'round_id' => 'integer',
         'tournament_id' => 'integer',
-        'pool_id' => 'integer',
         'term_date' => 'date',
         'home_key' => 'integer',
         'away_key' => 'integer',
@@ -42,11 +40,6 @@ class GameDraft extends Model
     public function tournament()
     {
         return $this->belongsTo(Tournament::class, 'tournament_id');
-    }
-
-    public function pool()
-    {
-        return $this->belongsTo(Pool::class, 'pool_id');
     }
 
     public function round()

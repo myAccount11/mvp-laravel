@@ -20,7 +20,6 @@ class Tournament extends Model
         'region_id',
         'start_date',
         'end_date',
-        'pool_count',
         'standing_group_count',
         'cross_pool_game_count',
         'cross_standing_group_game_count',
@@ -28,11 +27,8 @@ class Tournament extends Model
         'information',
         'team_count',
         'deleted',
-        'tournament_program_id',
         'tournament_structure_id',
         'tournament_registration_type_id',
-        'set_game_strategy_id',
-        'moving_strategy_id',
         'league_id',
         'free_reschedule_until_date',
         'registration_dead_line',
@@ -47,19 +43,15 @@ class Tournament extends Model
         'is_active' => 'boolean',
         'start_date' => 'datetime',
         'end_date' => 'datetime',
-        'pool_count' => 'integer',
         'standing_group_count' => 'integer',
         'cross_pool_game_count' => 'integer',
         'cross_standing_group_game_count' => 'integer',
         'round_type' => 'integer',
         'team_count' => 'integer',
         'deleted' => 'boolean',
-        'tournament_program_id' => 'integer',
         'region_id' => 'integer',
         'tournament_structure_id' => 'integer',
         'tournament_registration_type_id' => 'integer',
-        'set_game_strategy_id' => 'integer',
-        'moving_strategy_id' => 'integer',
         'league_id' => 'integer',
         'free_reschedule_until_date' => 'date',
         'registration_dead_line' => 'date',
@@ -111,11 +103,6 @@ class Tournament extends Model
         }
     }
 
-    public function pools()
-    {
-        return $this->hasMany(Pool::class, 'tournament_id');
-    }
-
     public function rounds()
     {
         return $this->hasMany(Round::class, 'tournament_id');
@@ -124,12 +111,27 @@ class Tournament extends Model
     public function teams()
     {
         return $this->belongsToMany(Team::class, 'team_tournaments', 'tournament_id', 'team_id')
-            ->withPivot('pool_id', 'pool_key', 'start_points');
+            ->withPivot('start_points');
     }
 
     public function teamTournaments()
     {
         return $this->hasMany(TeamTournament::class, 'tournament_id');
+    }
+
+    public function tournamentConfig()
+    {
+        return $this->hasOne(TournamentConfig::class, 'tournament_id');
+    }
+
+    public function tournamentMatches()
+    {
+        return $this->hasMany(Game::class, 'tournament_id');
+    }
+
+    public function tournamentGroups()
+    {
+        return $this->hasMany(TournamentGroup::class, 'tournament_id');
     }
 
 }

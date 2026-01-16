@@ -23,29 +23,26 @@ class Game extends Model
         'team_id_home',
         'team_id_away',
         'tournament_id',
-        'pool_id',
         'group_id',
         'round_id',
+        'round_number',
+        'round_name',
+        'match_number',
+        'position',
+        'games_between',
+        'home_wins',
+        'away_wins',
+        'parent_match_1_id',
+        'parent_match_2_id',
+        'group_position',
+        'is_final',
         'is_deleted',
-        'last_official_date',
-        'last_official_time',
-        'last_official_court_id',
         'season_sport_id',
         'original_term_date',
-        'is_locked',
-        'force_next_update',
-        'original_home_team_id',
-        'organizer_club_id',
-        'organizer_team_id',
         'pin_code',
-        'stats_calculated',
-        'star_rating',
-        'title_prefix',
         'penalty_status_id',
         'home_key',
         'away_key',
-        'draft_id',
-        'auto_time',
         'pool_points_fixed_home',
         'pool_points_fixed_away',
         'pool_bonus_fixed_home',
@@ -54,12 +51,8 @@ class Game extends Model
 
     protected $casts = [
         'date' => 'date',
-        'last_official_date' => 'date',
         'original_term_date' => 'date',
         'is_deleted' => 'boolean',
-        'is_locked' => 'boolean',
-        'force_next_update' => 'boolean',
-        'auto_time' => 'boolean',
         'status_id' => 'integer',
         'points_home' => 'integer',
         'points_away' => 'integer',
@@ -68,21 +61,23 @@ class Game extends Model
         'team_id_home' => 'integer',
         'team_id_away' => 'integer',
         'tournament_id' => 'integer',
-        'pool_id' => 'integer',
         'group_id' => 'integer',
         'round_id' => 'integer',
-        'last_official_court_id' => 'integer',
+        'round_number' => 'integer',
+        'match_number' => 'integer',
+        'position' => 'integer',
+        'games_between' => 'integer',
+        'home_wins' => 'integer',
+        'away_wins' => 'integer',
+        'parent_match_1_id' => 'integer',
+        'parent_match_2_id' => 'integer',
+        'group_position' => 'integer',
+        'is_final' => 'boolean',
         'season_sport_id' => 'integer',
-        'original_home_team_id' => 'integer',
-        'organizer_club_id' => 'integer',
-        'organizer_team_id' => 'integer',
         'pin_code' => 'integer',
-        'stats_calculated' => 'integer',
-        'star_rating' => 'integer',
         'penalty_status_id' => 'integer',
         'home_key' => 'integer',
         'away_key' => 'integer',
-        'draft_id' => 'integer',
         'pool_points_fixed_home' => 'integer',
         'pool_points_fixed_away' => 'integer',
         'pool_bonus_fixed_home' => 'integer',
@@ -92,11 +87,6 @@ class Game extends Model
     public function tournament()
     {
         return $this->belongsTo(Tournament::class, 'tournament_id');
-    }
-
-    public function pool()
-    {
-        return $this->belongsTo(Pool::class, 'pool_id');
     }
 
     public function round()
@@ -112,11 +102,6 @@ class Game extends Model
     public function guestTeam()
     {
         return $this->belongsTo(Team::class, 'team_id_away');
-    }
-
-    public function club()
-    {
-        return $this->belongsTo(Club::class, 'organizer_club_id');
     }
 
     public function court()
@@ -163,6 +148,32 @@ class Game extends Model
     public function gameNotes()
     {
         return $this->hasMany(GameNote::class, 'game_id');
+    }
+
+    public function winnerTeam()
+    {
+        return $this->belongsTo(Team::class, 'team_id_winner');
+    }
+
+    public function parentMatch1()
+    {
+        return $this->belongsTo(Game::class, 'parent_match_1_id');
+    }
+
+    public function parentMatch2()
+    {
+        return $this->belongsTo(Game::class, 'parent_match_2_id');
+    }
+
+    public function childMatches()
+    {
+        return $this->hasMany(Game::class, 'parent_match_1_id')
+            ->orWhere('parent_match_2_id', $this->id);
+    }
+
+    public function tournamentGroup()
+    {
+        return $this->belongsTo(TournamentGroup::class, 'group_id');
     }
 }
 

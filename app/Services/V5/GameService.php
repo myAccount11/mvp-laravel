@@ -273,28 +273,13 @@ class GameService
 
                     $gameDraftData = [];
 
-                    // Get tournament program items if tournament has a program
+                    // Tournament program functionality removed
                     $programItems = [];
-                    if ($tournament->tournament_program_id) {
-                        $items = $this->getTournamentProgramItemsService()->findAll([
-                            'where' => ['tournament_program_id' => $tournament->tournament_program_id],
-                        ]);
-                        // Convert to array for easier access
-                        $programItems = $items->map(function ($item) {
-                            return [
-                                'round_number'          => $item->round_number,
-                                'home_key'              => $item->home_key,
-                                'away_key'              => $item->away_key,
-                                'tournament_program_id' => $item->tournament_program_id,
-                            ];
-                        })->toArray();
-                    }
 
                     foreach ($roundsArray as $round) {
                         if (!$round['poolId']) {
                             $gameDraftParameters = [
                                 'round_id'             => $round['id'],
-                                'pool_id'              => null,
                                 'tournament_id'        => $round['tournamentId'],
                                 'term_date'            => $round['termDate'],
                                 'round_number'         => $round['roundNumber'],
@@ -494,9 +479,7 @@ class GameService
                     'tournament_id'      => $gameDraft->tournament_id,
                     'status_id'          => 1,
                     'number'             => ++$gameNumber,
-                    'draft_id'           => $gameDraft->id,
                     'date'               => $gameDraft->term_date,
-                    'original_term_date' => $gameDraft->term_date,
                     'home_key'           => $gameDraft->home_key,
                     'away_key'           => $gameDraft->away_key,
                     'season_sport_id'    => $seasonSportId,
@@ -925,14 +908,6 @@ class GameService
         if ($game) {
             $club = $this->getClubService()->findOne(['where' => ['id' => $data['clubId']]]);
             if ($club) {
-                $game->organizer_club_id = $club->id;
-                $game->save();
-
-                if (isset($data['forWholeGroup']) && $data['forWholeGroup'] && $game->pool_id && $game->round_id) {
-                    Game::where('pool_id', $game->pool_id)
-                        ->where('round_id', $game->round_id)
-                        ->update(['organizer_club_id' => $club->id]);
-                }
 
                 $this->getMessageService()->create([
                     'user_id'     => $user->id,
@@ -955,7 +930,7 @@ class GameService
     {
         $game = $this->findOne(['where' => ['id' => $id], 'include' => ['homeTeam', 'guestTeam']]);
 
-        $organizerClubId = $game->organizer_club_id ?? $game->homeTeam->club_id;
+        $organizerClubId = $game->homeTeam->club_id;
 
         $clubVenuesForHomeTeam = ClubVenue::where('club_id', $organizerClubId)->get();
         $clubVenuesForGuestTeam = ClubVenue::where('club_id', $game->guestTeam->club_id)->get();

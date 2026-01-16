@@ -184,8 +184,6 @@ class TeamService
             $data[] = [
                 'team_id' => $id,
                 'tournament_id' => $tournamentId,
-                'pool_id' => null,
-                'pool_key' => null,
                 'start_points' => null,
                 'is_deleted' => false,
             ];
@@ -214,7 +212,6 @@ class TeamService
             ->first();
 
         if ($existing) {
-            // Update existing record with new pool_id and other data
             DB::table('team_tournaments')
                 ->where('id', $existing->id)
                 ->update($data);

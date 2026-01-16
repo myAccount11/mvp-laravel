@@ -18,9 +18,7 @@ return new class extends Migration
             $table->integer('region_id')->nullable();
             $table->dateTime('start_date')->nullable();
             $table->dateTime('end_date')->nullable();
-            $table->integer('pool_count')->default(0);
             $table->integer('standing_group_count')->default(0);
-            $table->integer('cross_pool_game_count')->default(0);
             $table->integer('cross_standing_group_game_count')->default(0);
             $table->integer('round_type')->default(0);
             $table->text('information')->nullable();

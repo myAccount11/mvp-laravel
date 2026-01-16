@@ -21,7 +21,6 @@ use App\Repositories\V5\TimeSlotRepository;
 use App\Repositories\V5\ConflictRepository;
 use App\Repositories\V5\SuggestionRepository;
 use App\Repositories\V5\TournamentRepository;
-use App\Repositories\V5\PoolRepository;
 use App\Repositories\V5\RoundRepository;
 use App\Repositories\V5\LeagueRepository;
 use App\Repositories\V5\SystemRepository;
@@ -62,7 +61,6 @@ use App\Models\V5\TimeSlot;
 use App\Models\V5\Conflict;
 use App\Models\V5\Suggestion;
 use App\Models\V5\Tournament;
-use App\Models\V5\Pool;
 use App\Models\V5\Round;
 use App\Models\V5\League;
 use App\Models\V5\System;
@@ -156,10 +154,6 @@ class AppServiceProvider extends ServiceProvider
 
         $this->app->bind(TournamentRepository::class, function () {
             return new TournamentRepository(new Tournament());
-        });
-
-        $this->app->bind(PoolRepository::class, function () {
-            return new PoolRepository(new Pool());
         });
 
         $this->app->bind(RoundRepository::class, function () {
