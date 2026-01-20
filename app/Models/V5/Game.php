@@ -29,6 +29,7 @@ class Game extends Model
         'round_name',
         'match_number',
         'position',
+        'side',
         'games_between',
         'home_wins',
         'away_wins',

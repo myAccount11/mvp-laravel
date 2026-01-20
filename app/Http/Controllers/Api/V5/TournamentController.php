@@ -142,7 +142,7 @@ class TournamentController extends Controller
             },
             'tournamentMatches' => function ($q) {
                 $q->orderBy('round_number')->orderBy('match_number')
-                  ->with(['homeTeam', 'guestTeam', 'winnerTeam']);
+                  ->with(['homeTeam', 'guestTeam', 'winnerTeam', 'round']);
             },
             'rounds' => function ($q) {
                 $q->orderBy('id', 'ASC');
@@ -192,13 +192,13 @@ class TournamentController extends Controller
                       },
                       'matches' => function ($mq) {
                           $mq->orderBy('match_number')
-                            ->with(['homeTeam', 'guestTeam', 'winnerTeam']);
+                            ->with(['homeTeam', 'guestTeam', 'winnerTeam', 'round', 'parentMatch1', 'parentMatch2']);
                       }
                   ]);
             },
             'tournamentMatches' => function ($q) {
                 $q->orderBy('round_number')->orderBy('match_number')
-                  ->with(['homeTeam', 'guestTeam', 'winnerTeam']);
+                  ->with(['homeTeam', 'guestTeam', 'winnerTeam', 'round', 'parentMatch1', 'parentMatch2']);
             },
             'rounds' => function ($q) {
                 $q->orderBy('id', 'ASC');
@@ -269,7 +269,7 @@ class TournamentController extends Controller
                 },
                 'tournamentMatches' => function ($q) {
                     $q->orderBy('round_number')->orderBy('match_number')
-                      ->with(['homeTeam', 'guestTeam', 'winnerTeam']);
+                      ->with(['homeTeam', 'guestTeam', 'winnerTeam', 'round', 'parentMatch1', 'parentMatch2']);
                 },
                 'rounds',
                 'teams'

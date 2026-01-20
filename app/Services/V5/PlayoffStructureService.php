@@ -5,16 +5,22 @@ namespace App\Services\V5;
 use App\Models\V5\Tournament;
 use App\Models\V5\TournamentConfig;
 use App\Models\V5\Game;
-use App\Models\V5\Round;
-use App\Models\V5\TeamTournament;
+use Illuminate\Database\Eloquent\Collection as DatabaseCollection;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Collection;
 
 class PlayoffStructureService implements TournamentStructureGeneratorInterface
 {
     /**
      * Generate playoff bracket structure
      * Teams are randomly paired, winners advance, losers are eliminated
+     *
+     * Each matchup can have multiple games (games_between setting).
+     * For example, with games_between=2:
+     *   - Game 1: Team A (home) vs Team B (away)
+     *   - Game 2: Team B (home) vs Team A (away)
+     *
+     * Only first round has teams assigned. Other rounds have null teams
+     * until previous round winners are determined.
      */
     public function generateStructure(Tournament $tournament, array $settings): void
     {
@@ -29,9 +35,11 @@ class PlayoffStructureService implements TournamentStructureGeneratorInterface
             $gamesBetween = $settings['games_between'] ?? 1;
             $finalGamesBetween = $settings['final_games_between'] ?? 1;
 
+            // Delete existing tournament matches
             $tournament->tournamentMatches()->delete();
+
             // Save tournament config
-            $config = TournamentConfig::updateOrCreate(
+            TournamentConfig::updateOrCreate(
                 ['tournament_id' => $tournament->id],
                 ['settings' => $settings]
             );
@@ -47,107 +55,122 @@ class PlayoffStructureService implements TournamentStructureGeneratorInterface
             $teams = $teams->shuffle();
 
             // Calculate number of rounds needed
-            $roundsCount = (int) log($teamsCount, 2);
+            $roundsCount = (int)log($teamsCount, 2) * $gamesBetween - ($gamesBetween - $finalGamesBetween);
+
             $roundNames = $this->getRoundNames($teamsCount);
 
-            // Calculate date range for each round
-            $startDate = $tournament->start_date;
-            $endDate = $tournament->end_date;
-            $totalDays = $startDate->diffInDays($endDate);
-            $daysPerRound = max(1, floor($totalDays / $roundsCount));
+            $rounds = $tournament->rounds;
 
-            // Create rounds with calculated dates
-            $rounds = [];
-            for ($i = 1; $i <= $roundsCount; $i++) {
-                $roundStartDate = $startDate->copy()->addDays(($i - 1) * $daysPerRound);
-                $roundEndDate = ($i === $roundsCount) ? $endDate : $roundStartDate->copy()->addDays($daysPerRound - 1);
-
-                $round = Round::create([
-                    'tournament_id' => $tournament->id,
-                    'number' => $i,
-                    'from_date' => $roundStartDate,
-                    'to_date' => $roundEndDate,
-                    'type' => 0,
-                    'force_cross' => false,
-                    'deleted' => false,
-                ]);
-                $rounds[$i] = $round;
-            }
-
-            // Generate matches for each round
-            $matchesByRound = [];
-            $currentRoundTeams = $teams->pluck('team_id')->toArray();
-            $matchPosition = 1;
+            // First round: pair up the shuffled teams
+            $teamIds = $teams->pluck('team_id')->toArray();
+            $gamePosition = 1;
+            $games = collect();
 
             for ($roundNum = 1; $roundNum <= $roundsCount; $roundNum++) {
-                $roundMatches = [];
-                $isFinal = ($roundNum === $roundsCount);
-                $gamesBetweenForRound = $isFinal ? $finalGamesBetween : $gamesBetween;
-                $matchesInRound = count($currentRoundTeams) / 2;
+                $isFinal = ($roundNum > ((int)log($teamsCount, 2) - 1) * $gamesBetween);
+                $gamesForRound = $isFinal ? $finalGamesBetween : $gamesBetween;
+                $round = $rounds[$roundNum - 1];
 
-                for ($matchNum = 1; $matchNum <= $matchesInRound; $matchNum++) {
-                    $team1Id = array_shift($currentRoundTeams);
-                    $team2Id = array_shift($currentRoundTeams);
-                    $match = Game::create([
-                        'tournament_id' => $tournament->id,
-                        'round_id' => $rounds[$roundNum]->id,
-                        'round_number' => $roundNum,
-                        'round_name' => $roundNames[$roundNum - 1] ?? "Round {$roundNum}",
-                        'match_number' => $matchNum,
-                        'position' => $matchPosition++,
-                        'team_id_home' => $team1Id,
-                        'team_id_away' => $team2Id,
-                        'date' => $rounds[$roundNum]->from_date,
-                        'status_id' => null, // Will be set when match starts
-                        'games_between' => $gamesBetweenForRound,
-                        'home_wins' => 0,
-                        'away_wins' => 0,
-                        'is_final' => $isFinal,
-                        'is_deleted' => false,
-                        'created_at' => now(),
-                        'updated_at' => now(),
-                    ]);
+                $previousGames = $games->where('round_number', $roundNum - 1)
+                    ->where('is_final', $isFinal)->values();
 
-                    $roundMatches[] = $match;
-                }
+                // check should create from previous round or not
+                $shouldCreateFromPrevious = !$isFinal ? ($roundNum - 1) % ($gamesForRound) !== 0 : ((($roundNum - ((int)log($teamsCount, 2) - 1)) * $gamesBetween) > 1);
 
-                $matchesByRound[$roundNum] = $roundMatches;
+                if ($shouldCreateFromPrevious && $previousGames->count()) {
+                    $previousGames->each(function ($game) use (&$games, $round, $roundNum) {
+                        $games->push([
+                            ...$game,
+                            'team_id_home' => $game['team_id_away'],
+                            'team_id_away' => $game['team_id_home'],
+                            'round_number' => $roundNum,
+                            'round_id'     => $round->id,
+                            'date'         => $round->from_date,
+                        ]);
+                    });
+                } else {
+                    $currentRoundTeamsCount = $teamsCount;
+                    $actualRoundNumber = (int)(($roundNum - 1) / $gamesBetween);
+                    if ($actualRoundNumber) {
+                        $currentRoundTeamsCount = $teamsCount / (($isFinal ? ($actualRoundNumber + 1) : $actualRoundNumber) * 2);
+                    }
 
-                if ($roundNum < $roundsCount) {
-                    $nextRoundMatchesCount = $matchesInRound / 2;
-                    $currentRoundTeams = [];
-                    for ($i = 0; $i < $nextRoundMatchesCount; $i++) {
-                        $currentRoundTeams[] = null;
+                    for ($gameNumber = 1; $gameNumber <= $currentRoundTeamsCount / 2; $gameNumber++) {
+
+                        $homeTeam = $roundNum === 1 ? $teamIds[$gameNumber - 1] : null;
+                        $awayTeam = $roundNum === 1 ? $teamIds[$currentRoundTeamsCount - $gameNumber] : null;
+
+                        $games->push([
+                            'tournament_id' => $tournament->id,
+                            'round_id'      => $round->id,
+                            'round_number'  => $roundNum,
+                            'round_name'    => $roundNames[$actualRoundNumber] ?? "Round {$roundNum}",
+                            'match_number'  => $games->count() + 1,
+                            'position'      => $gamePosition++,
+                            'side'          => $isFinal ? 'center' : ($gameNumber > $currentRoundTeamsCount / 4 ? 'right' : 'left'),
+                            'team_id_home'  => $homeTeam,
+                            'team_id_away'  => $awayTeam,
+                            'date'          => $round->from_date,
+                            'status_id'     => null,
+                            'games_between' => $gamesForRound,
+                            'home_wins'     => 0,
+                            'away_wins'     => 0,
+                            'is_final'      => $isFinal,
+                            'is_deleted'    => false,
+                            'created_at'    => now(),
+                            'updated_at'    => now(),
+                        ]);
                     }
                 }
             }
-            $this->linkParentMatches($matchesByRound, $roundsCount);
+
+            Game::query()->insert($games->toArray());
+            $games = $tournament->games()->get()->groupBy('round_name');
+
+            // Link parent matches (first game of each matchup links to first game of parent matchups)
+            $this->linkParentMatches($games, $this->getRoundNames($teamsCount));
         });
     }
 
     /**
      * Link parent matches to create bracket structure
+     * Links first game of each matchup to first games of the two parent matchups
      */
-    private function linkParentMatches(array $matchesByRound, int $roundsCount): void
+    private function linkParentMatches(DatabaseCollection $matchesByRound, array $roundNames): void
     {
-        for ($roundNum = 2; $roundNum <= $roundsCount; $roundNum++) {
-            $currentRoundMatches = $matchesByRound[$roundNum];
-            $previousRoundMatches = $matchesByRound[$roundNum - 1];
+        $roundNames = array_reverse($roundNames);
+        foreach ($roundNames as $roundIndex => $roundName) {
 
-            $matchIndex = 0;
-            for ($i = 0; $i < count($previousRoundMatches); $i += 2) {
-                if ($matchIndex < count($currentRoundMatches)) {
-                    $currentMatch = $currentRoundMatches[$matchIndex];
-                    $currentMatch->parent_match_1_id = $previousRoundMatches[$i]->id;
-                    if (isset($previousRoundMatches[$i + 1])) {
-                        $currentMatch->parent_match_2_id = $previousRoundMatches[$i + 1]->id;
-                    }
-                    $currentMatch->save();
-                    $matchIndex++;
-                }
+            if ($roundIndex === count($roundNames) - 1) {
+                // Last round has no parents
+                continue;
+            }
+
+            $parentRoundGames = $matchesByRound[$roundNames[$roundIndex + 1]];
+            $currentRoundGames = $matchesByRound[$roundName];
+
+            $parentRoundGamesBetween = $parentRoundGames->first()->games_between;
+            $parentGames = $parentRoundGames->sortByDesc('id')->take($parentRoundGames->count() / $parentRoundGamesBetween);
+            if ($currentRoundGames->first()->is_final) {
+                $finalGame = $currentRoundGames->first();
+                $parent1 = $parentGames->pop();
+                $parent2 = $parentGames->pop();
+                $finalGame->parent_match_2_id = $parent1->id;
+                $finalGame->parent_match_1_id = $parent2->id;
+                $finalGame->save();
+                continue;
+            }
+
+            $currentGames = $currentRoundGames->sortBy('id')->take($currentRoundGames->count() / $currentRoundGames->first()->games_between);
+
+            foreach ($currentGames as $currentGame) {
+                $parent1 = $parentGames->pop();
+                $parent2 = $parentGames->pop();
+                $currentGame->parent_match_1_id = $parent1->id;
+                $currentGame->parent_match_2_id = $parent2->id;
+                $currentGame->save();
             }
         }
-
     }
 
     /**
@@ -156,7 +179,7 @@ class PlayoffStructureService implements TournamentStructureGeneratorInterface
     private function getRoundNames(int $teamsCount): array
     {
         $roundNames = [];
-        $roundsCount = (int) log($teamsCount, 2);
+        $roundsCount = (int)log($teamsCount, 2);
 
         $names = [
             1 => 'Final',
@@ -191,7 +214,7 @@ class PlayoffStructureService implements TournamentStructureGeneratorInterface
         if (!isset($settings['teams_count']) || !is_numeric($settings['teams_count'])) {
             $errors[] = 'teams_count is required';
         } else {
-            $teamsCount = (int) $settings['teams_count'];
+            $teamsCount = (int)$settings['teams_count'];
             // Check if teams_count is a power of 2
             if ($teamsCount < 2 || ($teamsCount & ($teamsCount - 1)) !== 0) {
                 $errors[] = 'teams_count must be a power of 2 (2, 4, 8, 16, 32, etc.)';
@@ -207,7 +230,7 @@ class PlayoffStructureService implements TournamentStructureGeneratorInterface
         }
 
         return [
-            'valid' => empty($errors),
+            'valid'  => empty($errors),
             'errors' => $errors,
         ];
     }
