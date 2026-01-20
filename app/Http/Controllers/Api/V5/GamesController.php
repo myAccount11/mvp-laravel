@@ -123,7 +123,6 @@ class GamesController extends Controller
                         ->with(['writer.userRoles', 'attachments']);
                 },
                 'gameNotes',
-                'club',
             ],
         ]);
 
